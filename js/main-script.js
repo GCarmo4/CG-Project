@@ -4,6 +4,8 @@
 
 var camera, scene, renderer;
 
+var geometry, material, mesh;
+
 var controls;
 
 /////////////////////
@@ -15,6 +17,8 @@ function createScene(){
     scene = new THREE.Scene();
 
     scene.add(new THREE.AxesHelper(10));
+    scene.background = new THREE.Color( 0xffffff );
+    createRectangle(0, 0, 0, 7, 7, 13, 0x000000);
 }
 
 //////////////////////
