@@ -22,6 +22,31 @@ const LCINTURA = 13;
 const RRODA = 2;
 const HRODA = 2;
 
+const LCABECA = 5;
+
+const LOLHO = 1;
+
+const LANTENA = 1;
+const HANTENA = 2;
+
+const LBRACO = 3;
+const HBRACO = 7;
+
+const LANTEBRACO = 7;
+const HANTEBRACO = 3;
+
+const RTUBO = 0.5;
+const HTUBO = 10;
+
+const LCOXA = 2;
+const HCOXA = 4;
+
+const LPERNA = 4;
+const HPERNA = 12;
+
+const LPE = 6;
+const HPE = 2;
+
 /////////////////////
 /* CREATE SCENE(S) */
 /////////////////////
