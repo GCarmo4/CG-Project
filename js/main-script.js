@@ -41,7 +41,35 @@ function createCamera() {
 ////////////////////////
 /* CREATE OBJECT3D(S) */
 ////////////////////////
+function createRectangle(x, y, z, width, height, depth, color){
+    'use strict';
 
+    var rectangle = new THREE.Object3D();
+
+    geometry = new THREE.BoxGeometry(width, height, depth);
+    material = new THREE.MeshBasicMaterial({color: color});
+    mesh = new THREE.Mesh(geometry, material);
+
+    rectangle.add(mesh);
+    rectangle.position.set(x, y, z);
+
+    scene.add(rectangle);
+}
+
+function createCylinder(x, y, z, radius, height, color){
+    'use strict';
+
+    var cylinder = new THREE.Object3D();
+
+    geometry = new THREE.CylinderGeometry(radius, radius, height);
+    material = new THREE.MeshBasicMaterial({color: color});
+    mesh = new THREE.Mesh(geometry, material);
+
+    cylinder.add(mesh);
+    cylinder.position.set(x, y, z);
+
+    scene.add(cylinder);
+}
 //////////////////////
 /* CHECK COLLISIONS */
 //////////////////////
