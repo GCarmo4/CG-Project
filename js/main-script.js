@@ -44,7 +44,8 @@ const HCOXA = 4;
 const LPERNA = 4;
 const HPERNA = 12;
 
-const LPE = 6;
+const CPE = 6;
+const LPE = 4;
 const HPE = 2;
 
 /////////////////////
