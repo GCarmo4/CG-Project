@@ -8,6 +8,20 @@ var geometry, material, mesh;
 
 var controls;
 
+const CTORSO = 7;
+const LTORSO = 13;
+
+const CABDOMEN = 7;
+const HABDOMEN = 6;
+const LABDOMEN = 7;
+
+const CCINTURA = 1;
+const HCINTURA = 2;
+const LCINTURA = 13;
+
+const RRODA = 2;
+const HRODA = 2;
+
 /////////////////////
 /* CREATE SCENE(S) */
 /////////////////////
@@ -18,7 +32,11 @@ function createScene(){
 
     scene.add(new THREE.AxesHelper(10));
     scene.background = new THREE.Color( 0xffffff );
-    createRectangle(0, 0, 0, 7, 7, 13, 0x000000);
+    createRectangle(0, 0, 0, CTORSO, CTORSO, LTORSO, 0x000000);
+    createRectangle(0, -CTORSO/2 - HABDOMEN/2, 0, CABDOMEN, HABDOMEN, LABDOMEN, 0x000000);
+    createRectangle(CABDOMEN/2 + CCINTURA/2, -CTORSO/2 - HABDOMEN + HCINTURA/2, 0, CCINTURA, HCINTURA, LCINTURA, 0x000000);
+    createCylinder(RRODA/8, -CTORSO/2 - HABDOMEN + HCINTURA/2, LCINTURA/2 - RRODA/2, RRODA, HRODA, 0x000000);
+    createCylinder(RRODA/8, -CTORSO/2 - HABDOMEN + HCINTURA/2, -LCINTURA/2 + RRODA/2, RRODA, HRODA, 0x000000);
 }
 
 //////////////////////
@@ -66,6 +84,7 @@ function createCylinder(x, y, z, radius, height, color){
     mesh = new THREE.Mesh(geometry, material);
 
     cylinder.add(mesh);
+    cylinder.rotation.x = Math.PI/2;
     cylinder.position.set(x, y, z);
 
     scene.add(cylinder);
