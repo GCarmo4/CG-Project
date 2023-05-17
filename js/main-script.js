@@ -34,10 +34,6 @@ function createCamera() {
     controls.update();
 }
 
-/////////////////////
-/* CREATE LIGHT(S) */
-/////////////////////
-
 ////////////////////////
 /* CREATE OBJECT3D(S) */
 ////////////////////////
