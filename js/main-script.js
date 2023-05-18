@@ -29,33 +29,6 @@ const wheelRadius = 5, wheelHeight = 5;
 const thighWidth = 4, thighHeight = 14, thighDepth = 4;
 const legWidth = 6, legHeight = 26, legDepth = 6;
 
-
-const LCABECA = 5;
-
-const LOLHO = 1;
-
-const LANTENA = 1;
-const HANTENA = 2;
-
-const LBRACO = 3;
-const HBRACO = 7;
-
-const LANTEBRACO = 7;
-const HANTEBRACO = 3;
-
-const RTUBO = 0.5;
-const HTUBO = 10;
-
-const LCOXA = 2;
-const HCOXA = 4;
-
-const LPERNA = 4;
-const HPERNA = 12;
-
-const CPE = 6;
-const LPE = 4;
-const HPE = 2;
-
 /////////////////////
 /* CREATE SCENE(S) */
 /////////////////////
