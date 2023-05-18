@@ -128,6 +128,13 @@ function createRobot() {
     rigthArmSet.add(rightForearm);
     rigthArmSet.position.set(torsoWidth / 2 + armWidth / 2, 0, - torsoDepth / 2 + armDepth / 2);
 
+    createLeftArm();
+
+    leftArmSet = new THREE.Object3D();
+    leftArmSet.add(leftArm);
+    leftArmSet.add(leftForearm);
+    leftArmSet.position.set(- torsoWidth / 2 - armWidth / 2, 0, - torsoDepth / 2 + armDepth / 2);
+
     createTorso();
 
     createAbdomen();
@@ -149,6 +156,7 @@ function createRobot() {
     robot = new THREE.Object3D();
     robot.add(headSet);
     robot.add(rigthArmSet);
+    robot.add(leftArmSet);
     robot.add(torso);
     robot.add(abdomen);
     robot.add(waist);
@@ -198,20 +206,20 @@ function createThigh() {
     'use strict';
 
     leftThigh = new THREE.Mesh(new THREE.BoxGeometry(thighWidth, thighHeight, thighDepth), materials[1]);
-    leftThigh.position.set(- abdomenWidth / 2 + thighWidth / 2, - thighHeight / 2, 0);
+    leftThigh.position.set(- abdomenWidth / 2 + thighWidth / 2 + 0.01, - thighHeight / 2, 0);
 
     rightThigh = new THREE.Mesh(new THREE.BoxGeometry(thighWidth, thighHeight, thighDepth), materials[1]);
-    rightThigh.position.set(abdomenWidth / 2 - thighWidth / 2, - thighHeight / 2 , 0);
+    rightThigh.position.set(abdomenWidth / 2 - thighWidth / 2 - 0.01, - thighHeight / 2 , 0);
 }
 
 function createLeg() {
     'use strict';
 
     leftLeg = new THREE.Mesh(new THREE.BoxGeometry(legWidth, legHeight, legDepth), materials[3]);
-    leftLeg.position.set(- abdomenWidth / 2 + thighWidth / 2, - thighHeight - legHeight / 2, 0);
+    leftLeg.position.set(- abdomenWidth / 2 + thighWidth / 2 + 0.01, - thighHeight - legHeight / 2, 0);
 
     rightLeg = new THREE.Mesh(new THREE.BoxGeometry(legWidth, legHeight, legDepth), materials[3]);
-    rightLeg.position.set(abdomenWidth / 2 - thighWidth / 2, - thighHeight - legHeight / 2, 0);
+    rightLeg.position.set(abdomenWidth / 2 - thighWidth / 2 - 0.01, - thighHeight - legHeight / 2, 0);
 }
 
 function createRigthArm() {
@@ -221,6 +229,15 @@ function createRigthArm() {
 
     rightForearm = new THREE.Mesh(new THREE.BoxGeometry(forearmWidth, forearmHeight, forearmDepth), materials[0]);
     rightForearm.position.set(0, - armHeight / 2 - forearmHeight / 2, torsoDepth / 2 - armDepth / 2);
+}
+
+function createLeftArm() {
+    'use strict';
+
+    leftArm = new THREE.Mesh(new THREE.BoxGeometry(armWidth, armHeight, armDepth), materials[0]);
+
+    leftForearm = new THREE.Mesh(new THREE.BoxGeometry(forearmWidth, forearmHeight, forearmDepth), materials[0]);
+    leftForearm.position.set(0, - armHeight / 2 - forearmHeight / 2,  torsoDepth / 2 - armDepth / 2);
 }
 
 function createRectangle(x, y, z, width, height, depth, color){
@@ -319,7 +336,9 @@ function init() {
 
     var armFolder = gui.addFolder("Arm");
     armFolder.add(rigthArmSet.position, 'x', torsoWidth / 2 - armWidth / 2, torsoWidth / 2 + armWidth / 2);
+    armFolder.add(leftArmSet.position, 'x', - torsoWidth / 2 - armWidth / 2, - torsoWidth / 2 + armWidth / 2);
     armFolder.open();
+    
 
     window.addEventListener("keydown", onKeyDown);
 }
