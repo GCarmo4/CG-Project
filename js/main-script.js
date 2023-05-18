@@ -13,7 +13,7 @@ var materials = [];
 var controls;
 
 var robot;
-var headSet, head;
+var headSet, head, antenna1, antenna2;
 var leftArmSet, rigthArmSet, leftArm, rightArm, leftForearm, rightForearm;
 var torso, abdomen, waist, leftWaistWheel, rightWaistWheel;
 var legSet, rightThigh, leftThigh, rightLeg, leftLeg, rightFoot, leftFoot, upperLeftLefWheel, lowerLeftLefWheel, uppperRightLegWheel;
@@ -28,6 +28,7 @@ const waistWidth = torsoWidth, waistHeight = 4, waistDepth = 1;
 const wheelRadius = 5, wheelHeight = 5;
 const thighWidth = 4, thighHeight = 14, thighDepth = 4;
 const legWidth = 6, legHeight = 26, legDepth = 6;
+const antennaWidth = 1, antennaHeight = 4, antennaDepth = 1;
 
 /////////////////////
 /* CREATE SCENE(S) */
@@ -94,6 +95,11 @@ function createRobot() {
     // headSet.rotation.x = 0;
     headSet.position.set(0, torsoHeight / 2 - 1, 0);
 
+    createAntennas();
+
+    headSet.add(antenna1);
+    headSet.add(antenna2);
+
     createRigthArm();
 
     rigthArmSet = new THREE.Object3D();
@@ -147,6 +153,15 @@ function createHead() {
     head.position.set(0, headHeight / 2 + 1, 0); 
 }
 
+function createAntennas() {
+    'use strict';
+
+    antenna1 = new THREE.Mesh(new THREE.BoxGeometry(antennaWidth, antennaHeight, antennaDepth), materials[3]);
+    antenna1.position.set(headWidth / 2 - antennaWidth, headHeight + 1 + antennaHeight/2, 0);
+
+    antenna2 = new THREE.Mesh(new THREE.BoxGeometry(antennaWidth, antennaHeight, antennaDepth), materials[3]);
+    antenna2.position.set(- headWidth / 2 + antennaWidth, headHeight + 1 + antennaHeight/2, 0);
+}
 function createTorso() {
     'use strict';
 
