@@ -16,19 +16,21 @@ var robot;
 var headSet, head, leftAntenna, rightAntenna;
 var leftArmSet, rigthArmSet, leftArm, rightArm, leftForearm, rightForearm;
 var torso, abdomen, waist, leftWaistWheel, rightWaistWheel;
-var legSet, rightThigh, leftThigh, rightLeg, leftLeg, rightFoot, leftFoot, upperLeftLefWheel, lowerLeftLefWheel, uppperRightLegWheel;
+var legSet, rightThigh, leftThigh, rightLeg, leftLeg, upperLeftLegWheel, lowerLeftLegWheel, uppperRightLegWheel, lowerRightLegWheel;
+var footSet, rightFoot, leftFoot, rightSidefoot, leftSidefoot;
 
 const headWidth = 8, headHeight = 8, headDepth = 8;
-
+const antennaWidth = 1, antennaHeight = 4, antennaDepth = 1;
 const armWidth = 6, armHeight = 16, armDepth = 8;
 const forearmWidth = armWidth, forearmHeight = 6, forearmDepth = 24;
 const torsoWidth = 24, torsoHeight = 16, torsoDepth = 24;
 const abdomenWidth = 12, abdomenHeight = 14, abdomenDepth = torsoDepth;
 const waistWidth = torsoWidth, waistHeight = 4, waistDepth = 1;
 const wheelRadius = 5, wheelHeight = 5;
-const thighWidth = 4, thighHeight = 14, thighDepth = 4;
-const legWidth = 6, legHeight = 26, legDepth = 6;
-const antennaWidth = 1, antennaHeight = 4, antennaDepth = 1;
+const thighWidth = 4, thighHeight = 13, thighDepth = 4;
+const legWidth = 6, legHeight = 30, legDepth = 6;
+const footWidth = legWidth, footHeight = 6, footDepth = 13;
+const sidefootWidth = wheelHeight, sidefootHeight = footHeight, sidefootDepth = 4;
 
 const offset = 0.1; // offset to avoid overlapping
 
@@ -83,7 +85,7 @@ function createFrontCamera() {
     'use strict';
 
     camera = new THREE.OrthographicCamera(window.innerWidth / - 2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / - 2, 1, 1000);
-    camera.position.set(0, -20, 20);
+    camera.position.set(0, 0, 20);
     camera.zoom = 6;
     camera.updateProjectionMatrix();
     cameras.push(camera);
@@ -93,7 +95,7 @@ function createSideCamera() {
     'use strict';
 
     camera = new THREE.OrthographicCamera(window.innerWidth / - 2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / - 2, 1, 1000);
-    camera.position.set(20, -20, 0);
+    camera.position.set(20, 0, 0);
     camera.rotation.y = Math.PI / 2;
     camera.zoom = 6;
     camera.updateProjectionMatrix();
@@ -104,7 +106,7 @@ function createTopCamera() {
     'use strict';
 
     camera = new THREE.OrthographicCamera(window.innerWidth / - 2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / - 2, 1, 1000);
-    camera.position.set(0, 20, 0);
+    camera.position.set(0, 50, 0);
     camera.rotation.x = - Math.PI / 2;
     camera.zoom = 6;
     camera.updateProjectionMatrix();
@@ -115,12 +117,11 @@ function createIsometricCamera() {
     'use strict';
 
     camera = new THREE.OrthographicCamera(window.innerWidth / - 2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / - 2, 1, 1000);
-    camera.position.set(50, 20, 50);
+    camera.position.set(50, 50, 50);
     camera.lookAt(scene.position);
     camera.zoom = 6;
     camera.updateProjectionMatrix();
     cameras.push(camera);    
-    camera.position.y = 0;
 }
 
 function createPrespectiveCamera() {
@@ -151,21 +152,21 @@ function createRobot() {
     headSet.add(leftAntenna);
     headSet.add(rightAntenna);
     // headSet.rotation.x = 0;
-    headSet.position.set(0, torsoHeight / 2 - offset, 0);
+    headSet.position.set(0, abdomenHeight + torsoHeight - offset, 0);
 
     createLeftArm();
 
     leftArmSet = new THREE.Object3D();
     leftArmSet.add(leftArm);
     leftArmSet.add(leftForearm);
-    leftArmSet.position.set(- torsoWidth / 2 - armWidth / 2, 0, - torsoDepth / 2 + armDepth / 2);
+    leftArmSet.position.set(- torsoWidth / 2 - armWidth / 2, abdomenHeight + torsoHeight, - torsoDepth / 2 + armDepth / 2);
 
     createRigthArm();
 
     rigthArmSet = new THREE.Object3D();
     rigthArmSet.add(rightArm);
     rigthArmSet.add(rightForearm);
-    rigthArmSet.position.set(torsoWidth / 2 + armWidth / 2, 0, - torsoDepth / 2 + armDepth / 2);
+    rigthArmSet.position.set(torsoWidth / 2 + armWidth / 2, abdomenHeight + torsoHeight, - torsoDepth / 2 + armDepth / 2);
 
     createTorso();
 
@@ -177,13 +178,30 @@ function createRobot() {
 
     createLeg();
 
+    createFoot();
+
+    footSet = new THREE.Object3D();
+    footSet.add(leftFoot);
+    footSet.add(rightFoot);
+    footSet.add(leftSidefoot);
+    footSet.add(rightSidefoot);
+    // footSet.rotation.x = 0;
+    footSet.position.set(0, - thighHeight - legHeight + footHeight / 2, 0);
+    console.log('footSet');
+    console.log(footSet.position);
+
     legSet = new THREE.Object3D();
     legSet.add(leftThigh);
     legSet.add(rightThigh);
     legSet.add(leftLeg);
     legSet.add(rightLeg);
+    legSet.add(lowerLeftLegWheel);
+    legSet.add(lowerRightLegWheel);
+    legSet.add(footSet);
     //legSet.rotation.x = Math.PI / 2;
-    legSet.position.set(0, - torsoHeight / 2 - abdomenHeight + legDepth / 2,  thighHeight - abdomenDepth / 2);
+    legSet.position.set(0, legDepth / 2,  thighHeight - abdomenDepth / 2);
+    console.log('legSet');
+    console.log(legSet.position);
 
     robot = new THREE.Object3D();
     robot.add(headSet);
@@ -216,28 +234,29 @@ function createTorso() {
     'use strict';
 
     torso = new THREE.Mesh(new THREE.BoxGeometry(torsoWidth, torsoHeight, torsoDepth), materials[0]);
+    torso.position.set(0, abdomenHeight + torsoHeight / 2, 0);
 }
 
 function createAbdomen() {
     'use strict';
 
     abdomen = new THREE.Mesh(new THREE.BoxGeometry(abdomenWidth, abdomenHeight, abdomenDepth), materials[0]);
-    abdomen.position.set(0, - torsoHeight / 2 - abdomenHeight / 2, 0);
+    abdomen.position.set(0, abdomenHeight / 2, 0);
 }
 
 function createWaist() {
     'use strict';
 
     waist = new THREE.Mesh(new THREE.BoxGeometry(waistWidth, waistHeight, waistDepth), materials[1]);
-    waist.position.set(0, - torsoHeight / 2 - abdomenHeight + waistHeight / 2, torsoDepth / 2 + waistDepth / 2);
+    waist.position.set(0, waistHeight / 2, torsoDepth / 2 + waistDepth / 2);
 
     leftWaistWheel = new THREE.Mesh(new THREE.CylinderGeometry(wheelRadius, wheelRadius, wheelHeight, 32), materials[2]);
     leftWaistWheel.rotation.z = Math.PI / 2;
-    leftWaistWheel.position.set(- abdomenWidth / 2 - wheelHeight / 2 - 1, - torsoHeight / 2 - abdomenHeight + waistHeight / 2, abdomenDepth / 6);
+    leftWaistWheel.position.set(- abdomenWidth / 2 - 1 - wheelHeight / 2, waistHeight / 2, abdomenDepth / 6);
 
     rightWaistWheel = new THREE.Mesh(new THREE.CylinderGeometry(wheelRadius, wheelRadius, wheelHeight, 32), materials[2]);
     rightWaistWheel.rotation.z = Math.PI / 2;
-    rightWaistWheel.position.set(abdomenWidth / 2 + wheelHeight / 2 + 1, - torsoHeight / 2 - abdomenHeight + waistHeight / 2, abdomenDepth / 6);
+    rightWaistWheel.position.set(abdomenWidth / 2 + 1 + wheelHeight / 2, waistHeight / 2, abdomenDepth / 6);
 }
 
 function createThigh() {
@@ -258,24 +277,52 @@ function createLeg() {
 
     rightLeg = new THREE.Mesh(new THREE.BoxGeometry(legWidth, legHeight, legDepth), materials[3]);
     rightLeg.position.set(abdomenWidth / 2 - thighWidth / 2 - offset, - thighHeight - legHeight / 2, 0);
+
+    lowerLeftLegWheel = new THREE.Mesh(new THREE.CylinderGeometry(wheelRadius, wheelRadius, wheelHeight, 32), materials[2]);
+    lowerLeftLegWheel.rotation.z = Math.PI / 2;
+    lowerLeftLegWheel.position.set(- abdomenWidth / 2 - wheelHeight / 2 - 1 + offset, - thighHeight - legHeight + wheelRadius + 1, legDepth / 2 - waistHeight / 2);
+
+    lowerRightLegWheel = new THREE.Mesh(new THREE.CylinderGeometry(wheelRadius, wheelRadius, wheelHeight, 32), materials[2]);
+    lowerRightLegWheel.rotation.z = Math.PI / 2;
+    lowerRightLegWheel.position.set(abdomenWidth / 2 + wheelHeight / 2 + 1 - offset, - thighHeight - legHeight + wheelRadius + 1, legDepth / 2 - waistHeight / 2);
+    console.log('lowerRightLegWheel');
+    console.log(lowerRightLegWheel.position);
 }
 
 function createRigthArm() {
     'use strict';
 
     rightArm = new THREE.Mesh(new THREE.BoxGeometry(armWidth, armHeight, armDepth), materials[0]);
+    rightArm.position.set(0, - armHeight / 2, 0);
 
     rightForearm = new THREE.Mesh(new THREE.BoxGeometry(forearmWidth, forearmHeight, forearmDepth), materials[0]);
-    rightForearm.position.set(0, - armHeight / 2 - forearmHeight / 2, torsoDepth / 2 - armDepth / 2);
+    rightForearm.position.set(0, - armHeight - forearmHeight / 2, torsoDepth / 2 - armDepth / 2);
 }
 
 function createLeftArm() {
     'use strict';
 
     leftArm = new THREE.Mesh(new THREE.BoxGeometry(armWidth, armHeight, armDepth), materials[0]);
+    leftArm.position.set(0, - armHeight / 2, 0);
 
     leftForearm = new THREE.Mesh(new THREE.BoxGeometry(forearmWidth, forearmHeight, forearmDepth), materials[0]);
-    leftForearm.position.set(0, - armHeight / 2 - forearmHeight / 2,  torsoDepth / 2 - armDepth / 2);
+    leftForearm.position.set(0, - armHeight - forearmHeight / 2,  torsoDepth / 2 - armDepth / 2);
+}
+
+function createFoot() {
+    'use strict';
+
+    leftFoot = new THREE.Mesh(new THREE.BoxGeometry(footWidth, footHeight, footDepth), materials[3]);
+    leftFoot.position.set(- abdomenWidth / 2 + thighWidth / 2 + offset , 0, footDepth / 2 - footHeight / 2);
+
+    rightFoot = new THREE.Mesh(new THREE.BoxGeometry(footWidth, footHeight, footDepth), materials[3]);
+    rightFoot.position.set(abdomenWidth / 2 - thighWidth / 2 - offset, 0, footDepth / 2 - footHeight / 2);
+
+    leftSidefoot = new THREE.Mesh(new THREE.BoxGeometry(sidefootWidth, sidefootHeight, sidefootDepth), materials[3]);
+    leftSidefoot.position.set(- abdomenWidth / 2 - 1 + offset - sidefootWidth / 2, 0, footDepth - footHeight / 2 - sidefootDepth / 2);
+
+    rightSidefoot = new THREE.Mesh(new THREE.BoxGeometry(sidefootWidth, sidefootHeight, sidefootDepth), materials[3]);
+    rightSidefoot.position.set(abdomenWidth / 2 + 1 - offset + sidefootWidth / 2, 0, footDepth - footHeight / 2 - sidefootDepth / 2);
 }
 
 //////////////////////
@@ -337,28 +384,24 @@ function init() {
 
     var frontFolder = camerasFolder.addFolder( 'Front Camera');
     frontFolder.add(cameras[0], 'zoom', 3, 8).onChange(function (value) {cameras[0].updateProjectionMatrix();});
-    frontFolder.add(cameras[0].position, 'x', -30, 30);
-    frontFolder.add(cameras[0].position, 'y', -25, -15);
-    frontFolder.open();
+    // frontFolder.add(cameras[0].position, 'x', -30, 30);
+    // frontFolder.add(cameras[0].position, 'y', -5, 5);
 
     var sideFolder = camerasFolder.addFolder( 'Side Camera');
     sideFolder.add(cameras[1], 'zoom', 3, 8).onChange(function (value) {cameras[1].updateProjectionMatrix();});
-    sideFolder.add(cameras[1].position, 'y', -25, -15);
-    sideFolder.add(cameras[1].position, 'z', -30, 30);
-    sideFolder.open();
+    // sideFolder.add(cameras[1].position, 'y', -5, 5);
+    // sideFolder.add(cameras[1].position, 'z', -30, 30);
 
     var topFolder = camerasFolder.addFolder( 'Top Camera');
     topFolder.add(cameras[2], 'zoom', 3, 8).onChange(function (value) {cameras[2].updateProjectionMatrix();});
-    topFolder.add(cameras[2].position, 'x', -30, -30);
-    topFolder.add(cameras[2].position, 'z', -30, 30);
-    topFolder.open();
+    // topFolder.add(cameras[2].position, 'x', -30, 30).onChange(function (value) {cameras[2].updateProjectionMatrix();});;
+    // topFolder.add(cameras[2].position, 'z', -30, 30).onChange(function (value) {cameras[2].updateProjectionMatrix();});;
 
     var isometricFolder = camerasFolder.addFolder( 'Isometric Orthographic Camera');
     isometricFolder.add(cameras[3], 'zoom', 3, 6).onChange(function (value) {cameras[3].updateProjectionMatrix();});
-    isometricFolder.add(cameras[3].position, 'x', 0, 50);
-    isometricFolder.add(cameras[3].position, 'y', -5, 5);
-    isometricFolder.add(cameras[3].position, 'z', 0, 50);
-    isometricFolder.open();
+    isometricFolder.add(cameras[3].position, 'x', 0, 50).onChange(function (value) {cameras[3].lookAt(scene.position);});
+    isometricFolder.add(cameras[3].position, 'y', 0, 50).onChange(function (value) {cameras[3].lookAt(scene.position);});
+    isometricFolder.add(cameras[3].position, 'z', 0, 50).onChange(function (value) {cameras[3].lookAt(scene.position);});
 
     var headFolder = gui.addFolder("Head");
     headFolder.add(headSet.rotation, 'x', - Math.PI, 0);
@@ -372,6 +415,10 @@ function init() {
     armFolder.add(rigthArmSet.position, 'x', torsoWidth / 2 - armWidth / 2, torsoWidth / 2 + armWidth / 2);
     armFolder.add(leftArmSet.position, 'x', - torsoWidth / 2 - armWidth / 2, - torsoWidth / 2 + armWidth / 2);
     armFolder.open();
+
+    var footFolder = gui.addFolder("Foot");
+    footFolder.add(footSet.rotation, 'x', 0, Math.PI / 2);
+    footFolder.open();
     
     window.addEventListener("keydown", onKeyDown);
 }
