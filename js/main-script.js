@@ -493,21 +493,17 @@ function init() {
     isometricFolder.add(cameras[3].position, 'z', 0, 50).onChange(function (value) {cameras[3].lookAt(scene.position);});
 
     var headFolder = gui.addFolder("Head");
-    headFolder.add(headSet.rotation, 'x', - Math.PI, 0);
-    headFolder.open();
+    headFolder.add(headSet.rotation, 'x', - Math.PI, 0).listen();
 
     var legFolder = gui.addFolder("Leg");
-    legFolder.add(legSet.rotation, 'x', 0, Math.PI / 2);
-    legFolder.open();
+    legFolder.add(legSet.rotation, 'x', 0, Math.PI / 2).listen();
 
     var armFolder = gui.addFolder("Arm");
-    armFolder.add(rigthArmSet.position, 'x', torsoWidth / 2 - armWidth / 2, torsoWidth / 2 + armWidth / 2);
-    armFolder.add(leftArmSet.position, 'x', - torsoWidth / 2 - armWidth / 2, - torsoWidth / 2 + armWidth / 2);
-    armFolder.open();
+    armFolder.add(rigthArmSet.position, 'x', torsoWidth / 2 - armWidth / 2, torsoWidth / 2 + armWidth / 2).listen();
+    armFolder.add(leftArmSet.position, 'x', - torsoWidth / 2 - armWidth / 2, - torsoWidth / 2 + armWidth / 2).listen();
 
     var footFolder = gui.addFolder("Foot");
-    footFolder.add(footSet.rotation, 'x', 0, Math.PI / 2);
-    footFolder.open();
+    footFolder.add(footSet.rotation, 'x', 0, Math.PI / 2).listen();
 
     stats.begin();
     render();
@@ -570,7 +566,6 @@ function onKeyDown(e) {
         case 97: //a
             footSet.userData.positive = 1;
             break;
-        
         case 68: //D
         case 100: //d
             leftArmSet.userData.positive = 1;
@@ -581,23 +576,18 @@ function onKeyDown(e) {
             leftArmSet.userData.negative = 1;
             rigthArmSet.userData.positive = 1;
             break;
-
         case 70: //F
         case 102: //f
             headSet.userData.negative = 1;
             break;
-        
-
         case 81: //Q
         case 113: //q
             footSet.userData.negative = 1;
             break;
-
         case 82: //R
         case 114: //r
             headSet.userData.positive = 1;
             break;
-
         case 83: //S
         case 115: //s
             legSet.userData.positive = 1;
