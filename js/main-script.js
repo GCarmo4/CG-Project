@@ -8,6 +8,8 @@ var geometry, material, mesh;
 
 var cameras = [];
 
+var ambientLight, directionalLight;
+
 var materials = [];
 
 var controls;
@@ -50,23 +52,24 @@ function createScene() {
     scene.background = new THREE.Color('skyblue');
 
     scene.add(new THREE.AxesHelper(30));
-
+    
+    createMaterials();
     createRobot();
 }
 
 function createMaterials() {
     'use strict';
 
-    material = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
+    material = new THREE.MeshPhongMaterial({ color: 0xff0000, wireframe: true });
     materials.push(material);
 
-    material = new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: true });
+    material = new THREE.MeshPhongMaterial({ color: 0xffffff, wireframe: true });
     materials.push(material);
 
-    material = new THREE.MeshBasicMaterial({ color: 0x000000, wireframe: true });
+    material = new THREE.MeshPhongMaterial({ color: 0x000000, wireframe: true });
     materials.push(material);
     
-    material = new THREE.MeshBasicMaterial({ color: 0x0000ff, wireframe: true });
+    material = new THREE.MeshPhongMaterial({ color: 0x0000ff, wireframe: true });
     materials.push(material);
 }
 
@@ -145,6 +148,20 @@ function createPrespectiveCamera() {
     // controls.update() must be called after any manual changes to the camera's transform
 
     cameras.push(camera);
+}
+
+/////////////////////
+/* CREATE LIGHT(S) */
+/////////////////////
+function createLights() {
+    'use strict';
+
+    ambientLight = new THREE.AmbientLight(0xFFFFFF, 0.5);
+    scene.add(ambientLight);
+
+    directionalLight = new THREE.DirectionalLight(0xFFFFFF, 1);
+    directionalLight.position.set(10, 20, 40);
+    scene.add(directionalLight);
 }
 
 ////////////////////////
@@ -459,11 +476,9 @@ function init() {
     stats = new Stats();
     document.body.appendChild( stats.dom );
 
-    createMaterials();
-
     createScene();
-
     createCameras();
+    createLights();
 
     clock = new THREE.Clock();
 
@@ -491,6 +506,26 @@ function init() {
     isometricFolder.add(cameras[3].position, 'x', 0, 50).onChange(function (value) {cameras[3].lookAt(scene.position);});
     isometricFolder.add(cameras[3].position, 'y', 0, 50).onChange(function (value) {cameras[3].lookAt(scene.position);});
     isometricFolder.add(cameras[3].position, 'z', 0, 50).onChange(function (value) {cameras[3].lookAt(scene.position);});
+
+    var ligthsFolder = gui.addFolder( 'Lights' );
+
+    // const ambient = { 
+    //     'color': ambientLight.color.getHex()
+    // };
+
+    var ambientFolder = ligthsFolder.addFolder( 'Ambient Light');
+    ambientFolder.add(ambientLight, 'intensity', 0, 1);
+    // ambientFolder.addColor( ambient, 'color' ).onChange(function (value) {if (typeof value === 'string') { value = value.replace( '#', '0x' ); } ambientLight.color.setHex(value)});
+
+    // const directional = { 
+    //     'color': directionalLight.color.getHex()
+    // };
+
+    var directionalFolder = ligthsFolder.addFolder( 'Directional Light');
+    directionalFolder.add(directionalLight, 'intensity', 0, 1);
+    directionalFolder.add(directionalLight.position, 'x', -30, 30);
+    directionalFolder.add(directionalLight.position, 'y', -30, 30);
+    // directionalFolder.addColor( directional, 'color' ).onChange(function (value) {if (typeof value === 'string') { value = value.replace( '#', '0x' ); } directionalLight.color.setHex(value)});
 
     var headFolder = gui.addFolder("Head");
     headFolder.add(headSet.rotation, 'x', - Math.PI, 0).listen();
