@@ -10,10 +10,13 @@ var lights = [];
 
 var materials = [];
 
-var clock;
+var clock, delta;
 var stats;
 
 var robot, head, leftArm, rigthArm, legs, foot, trailer;
+var trailerAnimation = false;
+var connectionPoint;
+var displacement;
 
 const headWidth = 8, headHeight = 8, headDepth = 8;
 const antennaWidth = 1, antennaHeight = 6, antennaDepth = 2;
@@ -417,7 +420,8 @@ function createTrailer() {
     trailer = new THREE.Object3D();
     trailer.userData = { xPositive: 0, xNegative: 0, zPositive: 0, zNegative: 0 , min: new THREE.Vector3(- containerWidth / 2, - containerHeight / 2 - deckHeight, containerDepth / 2), max: new THREE.Vector3(containerWidth / 2, containerHeight / 2, - containerDepth / 2) };
     createContainer(trailer);
-    trailer.position.set(50, containerHeight / 2 + 1 + wheelRadius + waistHeight / 2 , - 50);72 
+    trailer.position.set(50, containerHeight / 2 + 1 + wheelRadius + waistHeight / 2 , - 50);
+    connectionPoint = new THREE.Vector3(0, trailer.position.y, -58);
     scene.add(trailer);
 }
 
@@ -429,9 +433,9 @@ function createContainer(trailer) {
     deck.position.set(0, - containerHeight / 2 - deckHeight / 2, - containerDepth / 2 + deckDepth / 2);
     trailer.add(deck);
 
-    var linker = new THREE.Mesh(new THREE.BoxGeometry(linkerWidth, linkerHeight, linkerDepth), materials[3]);
-    linker.position.set(0, - containerHeight / 2 - linkerHeight / 2, containerDepth / 2 - linkerDepth / 2);
-    trailer.add(linker);
+    var connector = new THREE.Mesh(new THREE.BoxGeometry(linkerWidth, linkerHeight, linkerDepth), materials[3]);
+    connector.position.set(0, - containerHeight / 2 - linkerHeight / 2, containerDepth / 2 - linkerDepth / 2);
+    trailer.add(connector);
 
     var leftFirstWheel = new THREE.Mesh(new THREE.CylinderGeometry(wheelRadius, wheelRadius, wheelHeight, 32), materials[2]);
     leftFirstWheel.rotation.z = Math.PI / 2;
@@ -460,46 +464,43 @@ function createContainer(trailer) {
 function checkCollisions(){
     'use strict';
 
-    if (truckMode()) {
-        // console.log("truck mode");
-
-        if (hasCollision()) {
-            console.log("has collision");
-            trailer.position.x = 0;
-            trailer.position.z = -58;
+    if (!trailerAnimation) {
+        if (truckMode() && !trailerConnected()) {
+            if (hasCollision()) {
+                console.log("Collision detected!");
+                console.log(trailer.userData.xPositive);
+                console.log(trailer.userData.xNegative);
+                handleCollisions();
+            }
         }
-
     }
-
 }
 
 function truckMode() { 
     'use strict';
 
     return head.rotation.x == Math.PI && 
-        leftArm.position.x == - torsoWidth / 2 + armWidth / 2 && 
-        rigthArm.position.x == torsoWidth / 2 - armWidth / 2 && 
-        legs.rotation.x == Math.PI / 2 && 
-        foot.rotation.x == Math.PI / 2;
+           leftArm.position.x == - torsoWidth / 2 + armWidth / 2 && 
+           rigthArm.position.x == torsoWidth / 2 - armWidth / 2 && 
+           legs.rotation.x == Math.PI / 2 && 
+           foot.rotation.x == Math.PI / 2;
 }
 
 function hasCollision() {
     'use strict';
 
-    if (robot.userData.max.x <= (trailer.position.x + trailer.userData.min.x)) 
-        return false;
-    if (robot.userData.min.x >= (trailer.position.x + trailer.userData.max.x))
-        return false;
-    if (robot.userData.max.y <= (trailer.position.y + trailer.userData.min.y))
-        return false;
-    if (robot.userData.min.y >= (trailer.position.y + trailer.userData.max.y))
-        return false;
-    if (robot.userData.max.z >= (trailer.position.z + trailer.userData.min.z))
-        return false;
-    if (robot.userData.min.z <= (trailer.position.z + trailer.userData.max.z))
-        return false;
+    return robot.userData.max.x > (trailer.position.x + trailer.userData.min.x) &&
+           robot.userData.min.x < (trailer.position.x + trailer.userData.max.x) &&
+           robot.userData.max.y > (trailer.position.y + trailer.userData.min.y) &&
+           robot.userData.min.y < (trailer.position.y + trailer.userData.max.y) &&
+           robot.userData.max.z < (trailer.position.z + trailer.userData.min.z) &&
+           robot.userData.min.z > (trailer.position.z + trailer.userData.max.z);
+}
 
-    return true;
+function trailerConnected() {
+    'use strict';
+
+    return trailer.position.equals(connectionPoint);
 }
 
 ///////////////////////
@@ -508,26 +509,59 @@ function hasCollision() {
 function handleCollisions(){
     'use strict';
 
+    displacement = new THREE.Vector3(0, trailer.position.y, -58).sub(trailer.position).multiplyScalar(0.01);
+    trailerAnimation = true;
+    console.log(displacement);
+}
+
+function resetTrailer() {
+    'use strict';
+
+    if (!trailerAnimation && trailerConnected())
+        trailer.position.set(50, trailer.position.y , - 50);
 }
 
 ////////////
 /* UPDATE */
 ////////////
-function update(delta){
+function update(){
     'use strict';
 
-    trailer.position.x += (trailer.userData.xPositive - trailer.userData.xNegative) * 20 * delta;
-    trailer.position.z += (trailer.userData.zPositive - trailer.userData.zNegative) * 20 * delta;
+        if (!trailerAnimation) {
+
+        if (!trailerConnected()) {
+            trailer.position.x += (trailer.userData.xPositive - trailer.userData.xNegative) * 20 * delta;
+            trailer.position.z += (trailer.userData.zPositive - trailer.userData.zNegative) * 20 * delta;
+        }
+
+        foot.rotation.x = THREE.Math.clamp(foot.rotation.x + (foot.userData.positive - foot.userData.negative) * Math.PI / 2 * delta, 0, Math.PI / 2);
+
+        legs.rotation.x = THREE.Math.clamp(legs.rotation.x + (legs.userData.positive - legs.userData.negative) * Math.PI / 2 * delta, 0, Math.PI / 2);
+
+        head.rotation.x = THREE.Math.clamp(head.rotation.x + (head.userData.positive - head.userData.negative) * Math.PI * delta, 0, Math.PI);
+
+        leftArm.position.x = THREE.Math.clamp(leftArm.position.x + (leftArm.userData.positive - leftArm.userData.negative) * armWidth * delta, - torsoWidth / 2 - armWidth / 2, - torsoWidth / 2 + armWidth / 2);
+
+        rigthArm.position.x = THREE.Math.clamp(rigthArm.position.x + (rigthArm.userData.positive - rigthArm.userData.negative) * armWidth * delta, torsoWidth / 2 - armWidth / 2, torsoWidth / 2 + armWidth / 2);
+
+        checkCollisions();
+    }  else {
+        
+        trailer.position.add(displacement);
+
+        if ((-0.1 <= trailer.position.x && trailer.position.x <= 0.1) || (-58.01 <= trailer.position.z && trailer.position.z <= -58.01)) {
+            console.log('antes');
+            console.log(trailer.position);
+
+            trailer.position.set(0, trailer.position.y, -58);
+            trailerAnimation = false;
+
+            console.log('depois');
+            console.log(trailer.position);
+
+        }
+    }
     
-    foot.rotation.x = THREE.Math.clamp(foot.rotation.x + (foot.userData.positive - foot.userData.negative) * Math.PI / 2 * delta, 0, Math.PI / 2);
-
-    legs.rotation.x = THREE.Math.clamp(legs.rotation.x + (legs.userData.positive - legs.userData.negative) * Math.PI / 2 * delta, 0, Math.PI / 2);
-
-    head.rotation.x = THREE.Math.clamp(head.rotation.x + (head.userData.positive - head.userData.negative) * Math.PI * delta, 0, Math.PI);
-
-    leftArm.position.x = THREE.Math.clamp(leftArm.position.x + (leftArm.userData.positive - leftArm.userData.negative) * armWidth * delta, - torsoWidth / 2 - armWidth / 2, - torsoWidth / 2 + armWidth / 2);
-
-    rigthArm.position.x = THREE.Math.clamp(rigthArm.position.x + (rigthArm.userData.positive - rigthArm.userData.negative) * armWidth * delta, torsoWidth / 2 - armWidth / 2, torsoWidth / 2 + armWidth / 2);
 }
 
 /////////////
@@ -569,11 +603,11 @@ function init() {
 /////////////////////
 function animate() {
     'use strict';
-
-    var delta = clock.getDelta();
     
-    update(delta);
-    checkCollisions();
+    delta = clock.getDelta();
+    
+    update();
+    //checkCollisions();
     render();
 
     stats.update();
@@ -595,19 +629,19 @@ function onResize() {
 function onKeyDown(e) {
     'use strict';
 
-    console.log('keydown:' + e.key);
-
+    // console.log('keydown:' + e.key);
+    
     switch (e.key) {
-        case 'ArrowLeft': // left arrow
+        case 'ArrowLeft': // trailer left
             trailer.userData.xNegative = 1;
             break;
-        case 'ArrowUp': // up arrow
+        case 'ArrowUp': // trailer back
             trailer.userData.zNegative = 1;
             break;
-        case 'ArrowRight': // right arrow
+        case 'ArrowRight': // trailer right
             trailer.userData.xPositive = 1;
             break;
-        case 'ArrowDown': // down arrow
+        case 'ArrowDown': // trailer front
             trailer.userData.zPositive = 1;
             break;
 
