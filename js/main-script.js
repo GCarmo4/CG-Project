@@ -32,7 +32,7 @@ const sidefootWidth = wheelHeight, sidefootHeight = footHeight, sidefootDepth = 
 
 const containerWidth = 24, containerHeight = 32, containerDepth = 72;
 const deckWidth = containerWidth - 2 * wheelHeight, deckHeight = 8, deckDepth = 4 * wheelRadius + 6;
-const linkerWidth = 8, linkerHeight = deckHeight, linkerDepth = 12;
+const linkerWidth = 8, linkerHeight = deckHeight, linkerDepth = 16;
 
 const offset = 0.1; // offset to avoid overlapping
 
@@ -45,15 +45,13 @@ function createScene() {
     scene = new THREE.Scene();
     scene.background = new THREE.Color('skyblue');
 
-    scene.add(new THREE.AxesHelper(30));
+    scene.add(new THREE.AxesHelper(30)); // to remove
     
     createMaterials();
 
     createRobot();
-    scene.add(robot);
 
     createTrailer();
-    scene.add(trailer);
 }
 
 function createMaterials() {
@@ -467,6 +465,8 @@ function checkCollisions(){
 
         if (hasCollision()) {
             console.log("has collision");
+            trailer.position.x = 0;
+            trailer.position.z = -58;
         }
 
     }
@@ -476,7 +476,11 @@ function checkCollisions(){
 function truckMode() { 
     'use strict';
 
-    return head.rotation.x == Math.PI && leftArm.position.x == - torsoWidth / 2 + armWidth / 2 && rigthArm.position.x == torsoWidth / 2 - armWidth / 2 && legs.rotation.x == Math.PI / 2 && foot.rotation.x == Math.PI / 2;
+    return head.rotation.x == Math.PI && 
+        leftArm.position.x == - torsoWidth / 2 + armWidth / 2 && 
+        rigthArm.position.x == torsoWidth / 2 - armWidth / 2 && 
+        legs.rotation.x == Math.PI / 2 && 
+        foot.rotation.x == Math.PI / 2;
 }
 
 function hasCollision() {
@@ -591,73 +595,65 @@ function onResize() {
 function onKeyDown(e) {
     'use strict';
 
-    // console.log('keydown:' + e.keyCode);
+    console.log('keydown:' + e.key);
 
-    switch (e.keyCode) {
-        case 37: // left arrow
+    switch (e.key) {
+        case 'ArrowLeft': // left arrow
             trailer.userData.xNegative = 1;
             break;
-        case 38: // up arrow
+        case 'ArrowUp': // up arrow
             trailer.userData.zNegative = 1;
             break;
-        case 39: // right arrow
+        case 'ArrowRight': // right arrow
             trailer.userData.xPositive = 1;
             break;
-        case 40: // down arrow
+        case 'ArrowDown': // down arrow
             trailer.userData.zPositive = 1;
             break;
 
-        case 49: //1 Frontal Camera
+        case '1': // Frontal Camera
             camera = cameras[0];
             break;
-        case 50: //2 Side Camera
+        case '2': // Side Camera
             camera = cameras[1];
             break;
-        case 51: //3 Top Camera
+        case '3': // Top Camera
             camera = cameras[2];
             break;
-        case 52: //4 Isometric Orthographic Camera
+        case '4': // Isometric Orthographic Camera
             camera = cameras[3];
             break;
-        case 53: //5 Isometric Prespective Camera
+        case '5': // Isometric Prespective Camera
             camera = cameras[4];
             break;
-        case 54: //6 Toggle Wireframe
+        case '6': // Toggle Wireframe
             materials.forEach(material => {material.wireframe = !material.wireframe});
             break;
 
-        case 65: //A
-        case 97: //a foot in
+        case 'A': case 'a': // foot in
             foot.userData.positive = 1;
             break;
-        case 68: //D
-        case 100: //d arms in
+        case 'D': case 'd': 
             leftArm.userData.positive = 1;
             rigthArm.userData.negative = 1;
             break;
-        case 69: //E    
-        case 101: //e arms out
+        case 'E': case 'e': // arms out
             leftArm.userData.negative = 1;
             rigthArm.userData.positive = 1;
             break;
-        case 70: //F
-        case 102: //f head in
+        case 'F': case 'f': // head in
             head.userData.positive = 1;
             break;
-        case 81: //Q
-        case 113: //q foot out
+        case 'Q': case 'q': // foot out
             foot.userData.negative = 1;
             break;
-        case 82: //R
-        case 114: //r head out
+        case 'R': case 'r': // head out
             head.userData.negative = 1;
             break;
-        case 83: //S 
-        case 115: //s legs in
+        case 'S': case 's': // legs in
             legs.userData.positive = 1;
             break;
-        case 87: //W
-        case 119: //w legs out
+        case 'W': case 'w': // legs out
             legs.userData.negative = 1;
             break;    
     }
@@ -670,52 +666,46 @@ function onKeyDown(e) {
 function onKeyUp(e){
     'use strict';
 
-    switch (e.keyCode) {
-        case 37: // left arrow
+    // console.log('keyup:' + e.key);
+
+    switch (e.key) {
+        case 'ArrowLeft':
             trailer.userData.xNegative = 0;
             break;
-        case 38: // up arrow
+        case 'ArrowUp':
             trailer.userData.zNegative = 0;
             break;
-        case 39: // right arrow
+        case 'ArrowRight':
             trailer.userData.xPositive = 0;
             break;
-        case 40: // down arrow
+        case 'ArrowDown':
             trailer.userData.zPositive = 0;
             break;
 
-        case 65: //A
-        case 97: //a
+        case 'A': case 'a':
             foot.userData.positive = 0;
             break;
-        case 68: //D
-        case 100: //d
+        case 'D': case 'd':
             leftArm.userData.positive = 0;
             rigthArm.userData.negative = 0;
             break;
-        case 69: //E    
-        case 101: //e
+        case 'E': case 'e':
             leftArm.userData.negative = 0;
             rigthArm.userData.positive = 0;
             break;
-        case 70: //F
-        case 102: //f
+        case 'F': case 'f': 
             head.userData.positive = 0;
             break;
-        case 81: //Q
-        case 113: //q
+        case 'Q': case 'q': 
             foot.userData.negative = 0;
             break;
-        case 82: //R
-        case 114: //r
+        case 'R': case 'r':
             head.userData.negative = 0;
             break;
-        case 83: //S
-        case 115: //s
+        case 'S': case 's': 
             legs.userData.positive = 0;
             break;
-        case 87: //W
-        case 119: //w
+        case 'W': case 'w':
             legs.userData.negative = 0;
             break;
     }
