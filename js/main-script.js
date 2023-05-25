@@ -11,7 +11,6 @@ var lights = [];
 var materials = [];
 
 var clock, delta;
-var stats;
 
 var robot, head, leftArm, rigthArm, legs, foot, trailer;
 var trailerAnimation = false;
@@ -464,16 +463,7 @@ function createContainer(trailer) {
 function checkCollisions(){
     'use strict';
 
-    if (!trailerAnimation) {
-        if (truckMode() && !trailerConnected()) {
-            if (hasCollision()) {
-                console.log("Collision detected!");
-                console.log(trailer.userData.xPositive);
-                console.log(trailer.userData.xNegative);
-                handleCollisions();
-            }
-        }
-    }
+    return truckMode() && !trailerConnected() && hasCollision();
 }
 
 function truckMode() { 
@@ -509,15 +499,18 @@ function trailerConnected() {
 function handleCollisions(){
     'use strict';
 
-    displacement = new THREE.Vector3(0, trailer.position.y, -58).sub(trailer.position).multiplyScalar(0.01);
-    trailerAnimation = true;
-    console.log(displacement);
+    
+    if (checkCollisions()) {
+        displacement = new THREE.Vector3(0, trailer.position.y, -58).sub(trailer.position);// .multiplyScalar(0.01);
+        trailerAnimation = true;
+        //console.log(displacement);
+    }
 }
 
 function resetTrailer() {
     'use strict';
 
-    if (!trailerAnimation && trailerConnected())
+    if (trailer.userData.xPositive == 1 || trailer.userData.xNegative == 1 || trailer.userData.zPositive == 1 || trailer.userData.zNegative == 1) 
         trailer.position.set(50, trailer.position.y , - 50);
 }
 
@@ -527,11 +520,13 @@ function resetTrailer() {
 function update(){
     'use strict';
 
-        if (!trailerAnimation) {
+    if (!trailerAnimation) {
 
         if (!trailerConnected()) {
             trailer.position.x += (trailer.userData.xPositive - trailer.userData.xNegative) * 20 * delta;
             trailer.position.z += (trailer.userData.zPositive - trailer.userData.zNegative) * 20 * delta;
+        } else {
+            resetTrailer();
         }
 
         foot.rotation.x = THREE.Math.clamp(foot.rotation.x + (foot.userData.positive - foot.userData.negative) * Math.PI / 2 * delta, 0, Math.PI / 2);
@@ -544,12 +539,15 @@ function update(){
 
         rigthArm.position.x = THREE.Math.clamp(rigthArm.position.x + (rigthArm.userData.positive - rigthArm.userData.negative) * armWidth * delta, torsoWidth / 2 - armWidth / 2, torsoWidth / 2 + armWidth / 2);
 
-        checkCollisions();
+        handleCollisions();
     }  else {
         
-        trailer.position.add(displacement);
+        trailer.position.add(displacement.clone().multiplyScalar(delta));
 
         if ((-0.1 <= trailer.position.x && trailer.position.x <= 0.1) || (-58.01 <= trailer.position.z && trailer.position.z <= -58.01)) {
+            console.log('delta');
+            console.log(delta);
+            
             console.log('antes');
             console.log(trailer.position);
 
@@ -585,9 +583,6 @@ function init() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    stats = new Stats();
-    document.body.appendChild( stats.dom );
-
     createScene();
     createCameras();
     createLights();
@@ -609,8 +604,6 @@ function animate() {
     update();
     //checkCollisions();
     render();
-
-    stats.update();
 
     requestAnimationFrame(animate);
 }
