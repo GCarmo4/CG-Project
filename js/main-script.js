@@ -21,6 +21,9 @@ tecla das setas.
 
 var camera, scene, renderer;
 
+const width = 1280/2;
+const height = 608/2;
+
 var cameras = [];
 
 var lights = [];
@@ -159,13 +162,13 @@ function createCameras() {
 
     createIsometricCamera();
 
-    createPrespectiveCamera();
+    createPerspectiveCamera();
 }
 
 function createFrontCamera() {
     'use strict';
 
-    camera = new THREE.OrthographicCamera(window.innerWidth / - 2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / - 2, 1, 1000);
+    camera = new THREE.OrthographicCamera(width / -2, width / 2, height / 2, height / -2, 1, 1000);
     camera.position.set(0, 0, 75);
     camera.zoom = 4;
     camera.updateProjectionMatrix();
@@ -175,7 +178,7 @@ function createFrontCamera() {
 function createSideCamera() {
     'use strict';
 
-    camera = new THREE.OrthographicCamera(window.innerWidth / - 2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / - 2, 1, 1000);
+    camera = new THREE.OrthographicCamera(width / - 2, width / 2, height / 2, height / - 2, 1, 1000);
     camera.position.set(75, 0, 0);
     camera.rotation.y = Math.PI / 2;
     camera.zoom = 4;
@@ -186,7 +189,7 @@ function createSideCamera() {
 function createTopCamera() { 
     'use strict';
 
-    camera = new THREE.OrthographicCamera(window.innerWidth / - 2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / - 2, 1, 1000);
+    camera = new THREE.OrthographicCamera(width / - 2, width / 2, height / 2, height / - 2, 1, 1000);
     camera.position.set(0, 75, 0);
     camera.rotation.x = - Math.PI / 2;
     camera.zoom = 4;
@@ -197,7 +200,7 @@ function createTopCamera() {
 function createIsometricCamera() {
     'use strict';
 
-    camera = new THREE.OrthographicCamera(window.innerWidth / - 2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / - 2, 1, 1000);
+    camera = new THREE.OrthographicCamera(width / - 2, width / 2, height / 2, height / - 2, 1, 1000);
     camera.position.set(75, 75, 75);
     camera.lookAt(scene.position);
     camera.zoom = 4;
@@ -205,7 +208,7 @@ function createIsometricCamera() {
     cameras.push(camera);    
 }
 
-function createPrespectiveCamera() {
+function createPerspectiveCamera() {
     'use strict';
 
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
@@ -554,7 +557,7 @@ function update(){
         rigthArm.position.x = THREE.Math.clamp(rigthArm.position.x + (rigthArm.userData.positive - rigthArm.userData.negative) * armWidth * delta, torsoWidth / 2 - armWidth / 2, torsoWidth / 2 + armWidth / 2);
 
         handleCollisions();
-    }  else {
+    } else {
         
         var velocity = displacement.clone().multiplyScalar(delta);
         trailer.position.add(velocity);
