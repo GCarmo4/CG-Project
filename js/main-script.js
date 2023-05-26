@@ -4,15 +4,10 @@ Cena Interactiva com Camaras Fixas, Instanciacao de
 Primitivas Geometricas, Animacoes Simples e Colisoes
         Computacao Grafica - L11 - Grupo 24
 
-92424 Andre Azevedo 9h
-99228 Gonçalo Carmo 9h
-99245 João Santos 9h
-horas despendidas pelo grupo(media do grupo): 9h
-
-observacoes:
-- Para dar reset da posicao do reboque depois de a 
-animacao ter terminado, basta clicar em qualquer 
-tecla das setas.
+92424 Andre Azevedo 10h
+99228 Gonçalo Carmo 10h
+99245 João Santos 10h
+horas despendidas pelo grupo(media do grupo): 10h
 */
 
 //////////////////////
