@@ -33,7 +33,7 @@ var materials = [];
 var clock, delta;
 
 var robot, head, leftArm, rigthArm, legs, foot, trailer;
-var animation = false, connected = false;
+var animation = false; 
 var displacement, connectionPoint;
 
 // Dimensions for the robot
@@ -94,60 +94,6 @@ function createMaterials() {
     materials.push(new THREE.MeshPhongMaterial({ color: 0x808080, wireframe: false }));
 }
 
-function createGUI() {
-    'use strict';
-
-    var gui = new dat.GUI();
-    
-    // Lights GUI folder
-
-    var ligthsFolder = gui.addFolder( 'Lights' );
-
-    var ambientFolder = ligthsFolder.addFolder( 'Ambient Light');
-    ambientFolder.add(lights[0], 'intensity', 0, 1);
-
-    var directionalFolder = ligthsFolder.addFolder( 'Directional Light');
-    directionalFolder.add(lights[1], 'intensity', 0, 1);
-    directionalFolder.add(lights[1].position, 'x', -30, 30);
-    directionalFolder.add(lights[1].position, 'y', -30, 30);
-
-    // Cameras GUI folder
-
-    var camerasFolder = gui.addFolder( 'Cameras' );
-
-    var frontFolder = camerasFolder.addFolder( 'Front Camera');
-    frontFolder.add(cameras[0], 'zoom', 3, 8).onChange(function (value) {cameras[0].updateProjectionMatrix();});
-
-    var sideFolder = camerasFolder.addFolder( 'Side Camera');
-    sideFolder.add(cameras[1], 'zoom', 3, 8).onChange(function (value) {cameras[1].updateProjectionMatrix();});
-
-    var topFolder = camerasFolder.addFolder( 'Top Camera');
-    topFolder.add(cameras[2], 'zoom', 3, 8).onChange(function (value) {cameras[2].updateProjectionMatrix();});
-
-    var isometricFolder = camerasFolder.addFolder( 'Isometric Orthographic Camera');
-    isometricFolder.add(cameras[3], 'zoom', 3, 6).onChange(function (value) {cameras[3].updateProjectionMatrix();});
-    isometricFolder.add(cameras[3].position, 'x', 0, 50).onChange(function (value) {cameras[3].lookAt(scene.position);});
-    isometricFolder.add(cameras[3].position, 'y', 0, 50).onChange(function (value) {cameras[3].lookAt(scene.position);});
-    isometricFolder.add(cameras[3].position, 'z', 0, 50).onChange(function (value) {cameras[3].lookAt(scene.position);});
-
-    // Robot GUI folder
-
-    var robotFolder = gui.addFolder( 'Robot' );
-    
-    var headFolder = robotFolder.addFolder("Head");
-    headFolder.add(head.rotation, 'x', 0, Math.PI).listen();
-
-    var legFolder = robotFolder.addFolder("Leg");
-    legFolder.add(legs.rotation, 'x', 0, Math.PI / 2).listen();
-
-    var armFolder = robotFolder.addFolder("Arm");
-    armFolder.add(rigthArm.position, 'x', torsoWidth / 2 - armWidth / 2, torsoWidth / 2 + armWidth / 2).listen();
-    armFolder.add(leftArm.position, 'x', - torsoWidth / 2 - armWidth / 2, - torsoWidth / 2 + armWidth / 2).listen();
-
-    var footFolder = robotFolder.addFolder("Foot");
-    footFolder.add(foot.rotation, 'x', 0, Math.PI / 2).listen();
-}
-
 //////////////////////
 /* CREATE CAMERA(S) */
 //////////////////////
@@ -170,7 +116,7 @@ function createFrontCamera() {
 
     camera = new THREE.OrthographicCamera(width / -2, width / 2, height / 2, height / -2, 1, 1000);
     camera.position.set(0, 0, 75);
-    camera.zoom = 4;
+    camera.zoom = 2;
     camera.updateProjectionMatrix();
     cameras.push(camera);
 }
@@ -181,7 +127,7 @@ function createSideCamera() {
     camera = new THREE.OrthographicCamera(width / - 2, width / 2, height / 2, height / - 2, 1, 1000);
     camera.position.set(75, 0, 0);
     camera.rotation.y = Math.PI / 2;
-    camera.zoom = 4;
+    camera.zoom = 2;
     camera.updateProjectionMatrix();
     cameras.push(camera);
 }
@@ -192,7 +138,7 @@ function createTopCamera() {
     camera = new THREE.OrthographicCamera(width / - 2, width / 2, height / 2, height / - 2, 1, 1000);
     camera.position.set(0, 75, 0);
     camera.rotation.x = - Math.PI / 2;
-    camera.zoom = 4;
+    camera.zoom = 2;
     camera.updateProjectionMatrix();
     cameras.push(camera);
 }
@@ -203,7 +149,7 @@ function createIsometricCamera() {
     camera = new THREE.OrthographicCamera(width / - 2, width / 2, height / 2, height / - 2, 1, 1000);
     camera.position.set(75, 75, 75);
     camera.lookAt(scene.position);
-    camera.zoom = 4;
+    camera.zoom = 2;
     camera.updateProjectionMatrix();
     cameras.push(camera);    
 }
@@ -480,7 +426,7 @@ function createContainer() {
 function checkCollisions(){
     'use strict';
 
-    return !connected && truckMode() && hasCollision();
+    return truckMode() && hasCollision();
 }
 
 function truckMode() { 
@@ -504,12 +450,6 @@ function hasCollision() {
            robot.userData.min.z > (trailer.position.z + trailer.userData.max.z);
 }
 
-function trailerConnected() {
-    'use strict';
-
-    return trailer.position.equals(connectionPoint);
-}
-
 ///////////////////////
 /* HANDLE COLLISIONS */
 ///////////////////////
@@ -522,15 +462,6 @@ function handleCollisions(){
     }
 }
 
-function resetTrailer() {
-    'use strict';
-
-    if (trailer.userData.xPositive == 1 || trailer.userData.xNegative == 1 || trailer.userData.zPositive == 1 || trailer.userData.zNegative == 1) {
-        trailer.position.set(50, trailer.position.y , - 50);
-        connected = false;
-    }
-}
-
 ////////////
 /* UPDATE */
 ////////////
@@ -539,12 +470,8 @@ function update(){
 
     if (!animation) {
 
-        if (!connected) {
-            trailer.position.x += (trailer.userData.xPositive - trailer.userData.xNegative) * 20 * delta;
-            trailer.position.z += (trailer.userData.zPositive - trailer.userData.zNegative) * 20 * delta;
-        } else {
-            resetTrailer();
-        }
+        trailer.position.x += (trailer.userData.xPositive - trailer.userData.xNegative) * 20 * delta;
+        trailer.position.z += (trailer.userData.zPositive - trailer.userData.zNegative) * 20 * delta;
 
         foot.rotation.x = THREE.Math.clamp(foot.rotation.x + (foot.userData.positive - foot.userData.negative) * Math.PI / 2 * delta, 0, Math.PI / 2);
 
@@ -564,11 +491,9 @@ function update(){
 
         if (trailer.position.distanceTo(connectionPoint) <= velocity.length()) {
             trailer.position.set(connectionPoint.x, connectionPoint.y, connectionPoint.z);
-            connected = true;
             animation = false;
         }
     }
-    
 }
 
 /////////////
@@ -595,7 +520,6 @@ function init() {
     createScene();
     createCameras();
 
-    createGUI();
     clock = new THREE.Clock();
     
     window.addEventListener("keydown", onKeyDown);
