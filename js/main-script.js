@@ -16,8 +16,8 @@ horas despendidas pelo grupo(media do grupo): 10h
 
 var camera, scene, renderer;
 
-const width = 1280/2;
-const height = 608/2;
+const width = 1280;
+const height = 608;
 
 var cameras = [];
 
@@ -111,7 +111,7 @@ function createFrontCamera() {
 
     camera = new THREE.OrthographicCamera(width / -2, width / 2, height / 2, height / -2, 1, 1000);
     camera.position.set(0, 0, 75);
-    camera.zoom = 2;
+    camera.zoom = 4;
     camera.updateProjectionMatrix();
     cameras.push(camera);
 }
@@ -122,7 +122,7 @@ function createSideCamera() {
     camera = new THREE.OrthographicCamera(width / - 2, width / 2, height / 2, height / - 2, 1, 1000);
     camera.position.set(75, 0, 0);
     camera.rotation.y = Math.PI / 2;
-    camera.zoom = 2;
+    camera.zoom = 4;
     camera.updateProjectionMatrix();
     cameras.push(camera);
 }
@@ -133,7 +133,7 @@ function createTopCamera() {
     camera = new THREE.OrthographicCamera(width / - 2, width / 2, height / 2, height / - 2, 1, 1000);
     camera.position.set(0, 75, 0);
     camera.rotation.x = - Math.PI / 2;
-    camera.zoom = 2;
+    camera.zoom = 4;
     camera.updateProjectionMatrix();
     cameras.push(camera);
 }
@@ -144,7 +144,7 @@ function createIsometricCamera() {
     camera = new THREE.OrthographicCamera(width / - 2, width / 2, height / 2, height / - 2, 1, 1000);
     camera.position.set(75, 75, 75);
     camera.lookAt(scene.position);
-    camera.zoom = 2;
+    camera.zoom = 4;
     camera.updateProjectionMatrix();
     cameras.push(camera);    
 }
