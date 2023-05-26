@@ -1,3 +1,20 @@
+/*
+                    Trabalho B                  
+Cena Interactiva com Camaras Fixas, Instanciacao de 
+Primitivas Geometricas, Animacoes Simples e Colisoes
+        Computacao Grafica - L11 - Grupo 24
+
+92424 Andre Azevedo 9h
+99228 Gonçalo Carmo 9h
+99245 João Santos 9h
+horas despendidas pelo grupo(media do grupo): 9h
+
+observacoes:
+- Para dar reset da posicao do reboque depois
+de a animacao ter terminado, basta clicar em
+qualquer tecla das setas.
+*/
+
 //////////////////////
 /* GLOBAL VARIABLES */
 //////////////////////
@@ -13,10 +30,9 @@ var materials = [];
 var clock, delta;
 
 var robot, head, leftArm, rigthArm, legs, foot, trailer;
-var trailerAnimation = false;
-var connectionPoint;
-var displacement;
+var trailerAnimation = false, connectionPoint, displacement;
 
+// Dimensions for the robot
 const headWidth = 8, headHeight = 8, headDepth = 8;
 const antennaWidth = 1, antennaHeight = 6, antennaDepth = 2;
 const pipeRadius = 1, pipeHeight = 22;
@@ -32,11 +48,13 @@ const legWidth = 6, legHeight = 30, legDepth = 6;
 const footWidth = legWidth, footHeight = legDepth, footDepth = 14;
 const sidefootWidth = wheelHeight, sidefootHeight = footHeight, sidefootDepth = 4;
 
+// Dimensions for the trailer
 const containerWidth = 24, containerHeight = 32, containerDepth = 72;
 const deckWidth = containerWidth - 2 * wheelHeight, deckHeight = 8, deckDepth = 4 * wheelRadius + 6;
 const linkerWidth = 8, linkerHeight = deckHeight, linkerDepth = 16;
 
-const offset = 0.1; // offset to avoid overlapping
+// offset to avoid overlapping
+const offset = 0.1; 
 
 /////////////////////
 /* CREATE SCENE(S) */
@@ -47,13 +65,15 @@ function createScene() {
     scene = new THREE.Scene();
     scene.background = new THREE.Color('skyblue');
 
-    scene.add(new THREE.AxesHelper(30)); // to remove
+    // scene.add(new THREE.AxesHelper(30));
     
     createMaterials();
 
     createRobot();
 
     createTrailer();
+
+    createLights();
 }
 
 function createMaterials() {
@@ -188,15 +208,8 @@ function createPrespectiveCamera() {
     'use strict';
 
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
-    camera.position.set(70, 75, 75);
+    camera.position.set(75, 75, 75);
     camera.lookAt(scene.position);
-
-    // Orbit Controls
-    var controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.minDistance = 20;
-	controls.maxDistance = 1000;
-    // controls.update() must be called after any manual changes to the camera's transform
-
     cameras.push(camera);
 }
 
@@ -222,36 +235,36 @@ function createRobot() {
 
     head = new THREE.Object3D();
     head.userData = { positive: 0, negative: 0 };
-    createHead(head);
+    createHead();
     head.position.set(0, abdomenHeight + torsoHeight - offset, 0);
 
     leftArm = new THREE.Object3D();
     leftArm.userData = { positive: 0, negative: 0 };
-    createLeftArm(leftArm);
+    createLeftArm();
     leftArm.position.set(- torsoWidth / 2 - armWidth / 2, abdomenHeight + torsoHeight, - torsoDepth / 2 + armDepth / 2);
 
     rigthArm = new THREE.Object3D();
     rigthArm.userData = { positive: 0, negative: 0 };
-    createRigthArm(rigthArm);
+    createRigthArm();
     rigthArm.position.set(torsoWidth / 2 + armWidth / 2, abdomenHeight + torsoHeight, - torsoDepth / 2 + armDepth / 2);
 
     foot = new THREE.Object3D();
     foot.userData = { positive: 0, negative: 0 };
-    createFoot(foot);
+    createFoot();
     foot.position.set(0, - thighHeight - legHeight + footHeight / 2, 0);
 
     legs = new THREE.Object3D();
     legs.userData = { positive: 0, negative: 0 };
-    createThigh(legs);
-    createLeg(legs);
+    createThigh();
+    createLeg();
     legs.add(foot);
     legs.position.set(0, legDepth / 2,  thighHeight - abdomenDepth / 2);
 
     robot = new THREE.Object3D();
     robot.userData = { min: new THREE.Vector3(- torsoWidth / 2, 0, torsoDepth / 2), max: new THREE.Vector3(torsoWidth / 2, abdomenHeight + torsoHeight, - torsoDepth / 2 - legHeight - footDepth + legDepth) };
-    createTorso(robot);
-    createAbdomen(robot);
-    createWaist(robot);
+    createTorso();
+    createAbdomen();
+    createWaist();
     robot.add(head);
     robot.add(rigthArm);
     robot.add(leftArm);
@@ -259,7 +272,7 @@ function createRobot() {
     scene.add(robot);
 }
 
-function createHead(head) {
+function createHead() {
     'use strict';
 
     var _head = new THREE.Mesh(new THREE.BoxGeometry(headWidth, headHeight, headDepth), materials[3]);
@@ -283,7 +296,7 @@ function createHead(head) {
     head.add(rightEye);    
 }
 
-function createLeftArm(leftArm) {
+function createLeftArm() {
     'use strict';
 
     var LeftUpperArm = new THREE.Mesh(new THREE.BoxGeometry(armWidth, armHeight, armDepth), materials[0]);
@@ -299,7 +312,7 @@ function createLeftArm(leftArm) {
     leftArm.add(leftPipe);
 }
 
-function createRigthArm(rigthArm) {
+function createRigthArm() {
     'use strict';
 
     var rightUpperArm = new THREE.Mesh(new THREE.BoxGeometry(armWidth, armHeight, armDepth), materials[0]);
@@ -315,7 +328,7 @@ function createRigthArm(rigthArm) {
     rigthArm.add(rightPipe);
 }
 
-function createFoot(foot) {
+function createFoot() {
     'use strict';
 
     var leftFoot = new THREE.Mesh(new THREE.BoxGeometry(footWidth, footHeight, footDepth), materials[3]);
@@ -335,7 +348,7 @@ function createFoot(foot) {
     foot.add(rightSidefoot);
 }
 
-function createThigh(legs) {
+function createThigh() {
     'use strict';
 
     var leftThigh = new THREE.Mesh(new THREE.BoxGeometry(thighWidth, thighHeight, thighDepth), materials[1]);
@@ -347,7 +360,7 @@ function createThigh(legs) {
     legs.add(rightThigh);
 }
 
-function createLeg(legs) {
+function createLeg() {
     'use strict';
 
     var leftLeg = new THREE.Mesh(new THREE.BoxGeometry(legWidth, legHeight, legDepth), materials[3]);
@@ -379,7 +392,7 @@ function createLeg(legs) {
     legs.add(rightLegUpperWheel);
 }
 
-function createTorso(robot) {
+function createTorso() {
     'use strict';
 
     var torso = new THREE.Mesh(new THREE.BoxGeometry(torsoWidth, torsoHeight, torsoDepth), materials[0]);
@@ -387,7 +400,7 @@ function createTorso(robot) {
     robot.add(torso);
 }
 
-function createAbdomen(robot) {
+function createAbdomen() {
     'use strict';
 
     var abdomen = new THREE.Mesh(new THREE.BoxGeometry(abdomenWidth, abdomenHeight, abdomenDepth), materials[0]);
@@ -395,7 +408,7 @@ function createAbdomen(robot) {
     robot.add(abdomen);
 }
 
-function createWaist(robot) {
+function createWaist() {
     'use strict';
 
     var waist = new THREE.Mesh(new THREE.BoxGeometry(waistWidth, waistHeight, waistDepth), materials[1]);
@@ -418,13 +431,13 @@ function createTrailer() {
 
     trailer = new THREE.Object3D();
     trailer.userData = { xPositive: 0, xNegative: 0, zPositive: 0, zNegative: 0 , min: new THREE.Vector3(- containerWidth / 2, - containerHeight / 2 - deckHeight, containerDepth / 2), max: new THREE.Vector3(containerWidth / 2, containerHeight / 2, - containerDepth / 2) };
-    createContainer(trailer);
+    createContainer();
     trailer.position.set(50, containerHeight / 2 + 1 + wheelRadius + waistHeight / 2 , - 50);
     connectionPoint = new THREE.Vector3(0, trailer.position.y, -58);
     scene.add(trailer);
 }
 
-function createContainer(trailer) {
+function createContainer() {
     var container = new THREE.Mesh(new THREE.BoxGeometry(containerWidth, containerHeight, containerDepth), materials[4]);
     trailer.add(container);
 
@@ -501,9 +514,8 @@ function handleCollisions(){
 
     
     if (checkCollisions()) {
-        displacement = new THREE.Vector3(0, trailer.position.y, -58).sub(trailer.position);// .multiplyScalar(0.01);
+        displacement = new THREE.Vector3(connectionPoint.x, connectionPoint.y, connectionPoint.z).sub(trailer.position);
         trailerAnimation = true;
-        //console.log(displacement);
     }
 }
 
@@ -543,15 +555,11 @@ function update(){
     }  else {
         
         trailer.position.add(displacement.clone().multiplyScalar(delta));
+        console.log('trailer.position');
+        console.log(trailer.position);
 
-        if ((-0.1 <= trailer.position.x && trailer.position.x <= 0.1) || (-58.01 <= trailer.position.z && trailer.position.z <= -58.01)) {
-            console.log('delta');
-            console.log(delta);
-            
-            console.log('antes');
-            console.log(trailer.position);
-
-            trailer.position.set(0, trailer.position.y, -58);
+        if ((connectionPoint.x - 0.1 <= trailer.position.x && trailer.position.x <= connectionPoint.x + 0.1) || (connectionPoint.z - 0.1 <= trailer.position.z && trailer.position.z <= connectionPoint.z + 0.1)) {
+            trailer.position.set(connectionPoint.x, connectionPoint.y, connectionPoint.z);
             trailerAnimation = false;
 
             console.log('depois');
@@ -585,9 +593,9 @@ function init() {
 
     createScene();
     createCameras();
-    createLights();
-    clock = new THREE.Clock();
+
     createGUI();
+    clock = new THREE.Clock();
     
     window.addEventListener("keydown", onKeyDown);
     window.addEventListener("keyup", onKeyUp);
@@ -602,7 +610,6 @@ function animate() {
     delta = clock.getDelta();
     
     update();
-    //checkCollisions();
     render();
 
     requestAnimationFrame(animate);
@@ -614,6 +621,7 @@ function animate() {
 function onResize() { 
     'use strict';
 
+    // Not necessary for this delivery (per teacher)
 }
 
 ///////////////////////
@@ -622,8 +630,6 @@ function onResize() {
 function onKeyDown(e) {
     'use strict';
 
-    // console.log('keydown:' + e.key);
-    
     switch (e.key) {
         case 'ArrowLeft': // trailer left
             trailer.userData.xNegative = 1;
@@ -692,8 +698,6 @@ function onKeyDown(e) {
 ///////////////////////
 function onKeyUp(e){
     'use strict';
-
-    // console.log('keyup:' + e.key);
 
     switch (e.key) {
         case 'ArrowLeft':
