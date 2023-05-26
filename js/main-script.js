@@ -10,9 +10,9 @@ Primitivas Geometricas, Animacoes Simples e Colisoes
 horas despendidas pelo grupo(media do grupo): 9h
 
 observacoes:
-- Para dar reset da posicao do reboque depois
-de a animacao ter terminado, basta clicar em
-qualquer tecla das setas.
+- Para dar reset da posicao do reboque depois de a 
+animacao ter terminado, basta clicar em qualquer 
+tecla das setas.
 */
 
 //////////////////////
@@ -30,7 +30,8 @@ var materials = [];
 var clock, delta;
 
 var robot, head, leftArm, rigthArm, legs, foot, trailer;
-var trailerAnimation = false, connectionPoint, displacement;
+var animation = false, connected = false;
+var displacement, connectionPoint;
 
 // Dimensions for the robot
 const headWidth = 8, headHeight = 8, headDepth = 8;
@@ -476,7 +477,7 @@ function createContainer() {
 function checkCollisions(){
     'use strict';
 
-    return truckMode() && !trailerConnected() && hasCollision();
+    return !connected && truckMode() && hasCollision();
 }
 
 function truckMode() { 
@@ -512,18 +513,19 @@ function trailerConnected() {
 function handleCollisions(){
     'use strict';
 
-    
     if (checkCollisions()) {
         displacement = new THREE.Vector3(connectionPoint.x, connectionPoint.y, connectionPoint.z).sub(trailer.position);
-        trailerAnimation = true;
+        animation = true;
     }
 }
 
 function resetTrailer() {
     'use strict';
 
-    if (trailer.userData.xPositive == 1 || trailer.userData.xNegative == 1 || trailer.userData.zPositive == 1 || trailer.userData.zNegative == 1) 
+    if (trailer.userData.xPositive == 1 || trailer.userData.xNegative == 1 || trailer.userData.zPositive == 1 || trailer.userData.zNegative == 1) {
         trailer.position.set(50, trailer.position.y , - 50);
+        connected = false;
+    }
 }
 
 ////////////
@@ -532,9 +534,9 @@ function resetTrailer() {
 function update(){
     'use strict';
 
-    if (!trailerAnimation) {
+    if (!animation) {
 
-        if (!trailerConnected()) {
+        if (!connected) {
             trailer.position.x += (trailer.userData.xPositive - trailer.userData.xNegative) * 20 * delta;
             trailer.position.z += (trailer.userData.zPositive - trailer.userData.zNegative) * 20 * delta;
         } else {
@@ -554,17 +556,13 @@ function update(){
         handleCollisions();
     }  else {
         
-        trailer.position.add(displacement.clone().multiplyScalar(delta));
-        console.log('trailer.position');
-        console.log(trailer.position);
+        var velocity = displacement.clone().multiplyScalar(delta);
+        trailer.position.add(velocity);
 
-        if ((connectionPoint.x - 0.1 <= trailer.position.x && trailer.position.x <= connectionPoint.x + 0.1) || (connectionPoint.z - 0.1 <= trailer.position.z && trailer.position.z <= connectionPoint.z + 0.1)) {
+        if (trailer.position.distanceTo(connectionPoint) <= velocity.length()) {
             trailer.position.set(connectionPoint.x, connectionPoint.y, connectionPoint.z);
-            trailerAnimation = false;
-
-            console.log('depois');
-            console.log(trailer.position);
-
+            connected = true;
+            animation = false;
         }
     }
     
