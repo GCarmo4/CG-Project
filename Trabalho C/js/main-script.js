@@ -2,7 +2,7 @@
 /* GLOBAL VARIABLES */
 //////////////////////
 
-var camera, scene, renderer, fieldRenderer, skyRenderer;
+var camera, scene, renderer, skyRenderer;
 
 var geometry, material, mesh;
 
@@ -57,10 +57,10 @@ function randomNumberGenerator(ll, rl) {
 function createFieldScene() {
     let fieldScene = new THREE.Scene();
     let flowerMaterials = [
-        new THREE.MeshStandardMaterial({color: 'white'}),
-        new THREE.MeshStandardMaterial({color: 'yellow'}),
-        new THREE.MeshStandardMaterial({color: 0xC8A2C8}), // lilac
-        new THREE.MeshStandardMaterial({color: 'lightblue'})
+        new THREE.MeshBasicMaterial({color: 'white'}),
+        new THREE.MeshBasicMaterial({color: 'yellow'}),
+        new THREE.MeshBasicMaterial({color: 0xC8A2C8}), // lilac
+        new THREE.MeshBasicMaterial({color: 'lightblue'})
     ];
     let flowerGeometry = new THREE.SphereGeometry(1, 1, 1);
     fieldScene.background = new THREE.Color('lightgreen');
@@ -77,6 +77,8 @@ function createFieldScene() {
 }
 
 function createFieldCamera() {
+    'use strict';
+
     let fieldCamera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 1000 );
     fieldCamera.position.set(0, 0, 200);
     fieldCamera.lookAt(0, 0, 0);
@@ -91,16 +93,17 @@ function generateFieldSceneTexture(){
         antialias: true
     }); fieldRenderer.setSize(window.innerWidth, window.innerHeight);
 
-    let fieldScene = createFieldScene(); // problem here?
-    let fieldCamera = createFieldCamera(); // problem here?
+    let fieldScene = createFieldScene();
+    let fieldCamera = createFieldCamera();
 
-    fieldRenderer.render(fieldScene, fieldCamera); // this is not rendering right
 
-    return new THREE.CanvasTexture(fieldRenderer.domElement, THREE.UVMapping, THREE.RepeatWrapping, THREE.RepeatWrapping)
+    fieldRenderer.render(fieldScene, fieldCamera);
+
+    return new THREE.CanvasTexture(fieldRenderer.domElement, THREE.UVMapping, THREE.RepeatWrapping, THREE.RepeatWrapping) // this is not getting the colors
 }
 
-function saveTexture() {
-    renderer.domElement.toBlob(function(blob){
+function saveTexture(r) {
+    r.domElement.toBlob(function(blob){
         var a = document.createElement('a');
         var url = URL.createObjectURL(blob);
         a.href = url;
@@ -162,17 +165,15 @@ function createScene(){
 
     scene.background = new THREE.Color('white')
 
-    scene.add(new THREE.AxesHelper(100));
+    // scene.add(new THREE.AxesHelper(100));
 
     createField();
-
 /*
     ovni = new THREE.Object3D();
     ovni.userData = { xPositive: 0, xNegative: 0, zPositive: 0, zNegative: 0 };
     createOvni();
     ovni.position.set(0, 100, 0);
-    scene.add(ovni);
- */
+    scene.add(ovni);*/
 }
 
 //////////////////////
@@ -299,9 +300,10 @@ function update(){
         doneGeneratingSky()
     }
 
+    /*
     ovni.position.x += (ovni.userData.xPositive - ovni.userData.xNegative) * 20 * delta;
     ovni.position.z += (ovni.userData.zPositive - ovni.userData.zNegative) * 20 * delta;
-    //ovni.rotation.y += 0.01;
+    //ovni.rotation.y += 0.01;*/
 }
 
 /////////////
