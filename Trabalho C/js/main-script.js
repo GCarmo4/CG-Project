@@ -117,14 +117,14 @@ function createScene(){
 
     scene.add(new THREE.AxesHelper(100));
 
-    geometry = new THREE.PlaneBufferGeometry(128, 128, 3, 3);
+    geometry = new THREE.PlaneGeometry(128, 128, 128, 128);
 
 
     let texture = new THREE.TextureLoader().load('textures/heightmap.png' );
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
 
-    material = new THREE.MeshBasicMaterial( { color: texture} );
+    material = new THREE.MeshStandardMaterial( { color: 'green', displacementMap: texture, displacementScale:100} );
 
     mesh = new THREE.Mesh( geometry, material );
     mesh.rotation.x = - Math.PI / 2;
