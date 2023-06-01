@@ -117,7 +117,7 @@ function createScene(){
 
     scene.add(new THREE.AxesHelper(100));
 
-    geometry = new THREE.PlaneGeometry(128, 128, 128, 128);
+    geometry = new THREE.PlaneGeometry(128*2, 128*2, 128, 128);
 
 
     let texture = new THREE.TextureLoader().load('textures/heightmap.png' );
