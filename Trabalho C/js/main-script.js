@@ -139,17 +139,9 @@ function generateSkySceneTexture(){
 /////////////////////
 /* CREATE SCENE(S) */
 /////////////////////
-function createScene(){
-    'use strict';
 
-    scene = new THREE.Scene();
-
-    scene.background = new THREE.Color('white')
-
-    scene.add(new THREE.AxesHelper(100));
-
+function createField() {
     geometry = new THREE.PlaneGeometry(128*2, 128*2, 128*2/10, 128*2/10);
-
 
     let texture = new THREE.TextureLoader().load('textures/heightmap.png' );
     texture.wrapS = THREE.RepeatWrapping;
@@ -161,12 +153,26 @@ function createScene(){
     field.rotation.x = - Math.PI / 2;
 
     scene.add( field );
+}
 
+function createScene(){
+    'use strict';
+
+    scene = new THREE.Scene();
+
+    scene.background = new THREE.Color('white')
+
+    scene.add(new THREE.AxesHelper(100));
+
+    createField();
+
+/*
     ovni = new THREE.Object3D();
     ovni.userData = { xPositive: 0, xNegative: 0, zPositive: 0, zNegative: 0 };
     createOvni();
     ovni.position.set(0, 100, 0);
     scene.add(ovni);
+ */
 }
 
 //////////////////////
@@ -190,8 +196,18 @@ function createCameras(){
 function createLights(){
     'use strict';
 
+    /*
     createSpotLight();
     createPointLights();
+     */
+    createAmbientLight();
+}
+
+function createAmbientLight(){
+    'use strict';
+
+    var ambientLight = new THREE.AmbientLight(0xFFFFFF, 1);
+    scene.add( ambientLight );
 }
 
 function createSpotLight() {
