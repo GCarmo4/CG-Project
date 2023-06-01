@@ -2,25 +2,21 @@
 /* GLOBAL VARIABLES */
 //////////////////////
 
-var camera, scene, renderer;
+var camera, scene, renderer, fieldRenderer, skyRenderer;
 
 var geometry, material, mesh;
 
 var texturesGenerator = new TexturesGenerator();
 var frameTexture;
 
-var ovni, cylinder;
+var ovni, cylinder, field, sky;
 
 var spotLight;
 var pointLight = [];
 
 var clock, delta;
 
-/* */
-
-const starMaterials = [
-]
-
+const TEXTURES_PATH = "C:\\Users\\rogst\\Documents\\cgraf\\CG\\Trabalho C\\";
 
 
 function randomChoice(arr) {
@@ -35,7 +31,8 @@ function randomNumberGenerator(ll, rl) {
     return Math.floor(Math.random() * (rl - ll) + ll);
 }
 
-function generateFieldSceneImage(){
+
+function generateFieldSceneTexture(){
     'use strict';
 
     let fieldScene = new THREE.Scene();
@@ -56,10 +53,13 @@ function generateFieldSceneImage(){
         fieldScene.add(fieldMesh);
     }
 
-    renderer.render(fieldScene, camera);
+    fieldRenderer.render(fieldScene, camera);
+    field.material.map = new THREE.CanvasTexture(fieldRenderer.domElement, THREE.UVMapping, THREE.RepeatWrapping, THREE.RepeatWrapping)
 }
 
-function generateSkySceneImage(){
+
+
+function generateSkySceneTexture(){
     'use strict';
 
     let skyScene = new THREE.Scene();
@@ -68,7 +68,7 @@ function generateSkySceneImage(){
         new THREE.MeshBasicMaterial({color: 'darkviolet'})
     ]
     let starGeometry = new THREE.SphereGeometry(1, 1, 1);
-    skyScene.background = new THREE.Texture.gradientmap('ba');
+    //fixme skyScene.background = new THREE.Texture.gradientmap('ba');
 
     let numberOfstars = randomNumberGenerator(100,1000);
     for (let i = 0; i < numberOfstars; i++){
@@ -77,6 +77,9 @@ function generateSkySceneImage(){
         starMesh.position.set(Math.random() * window.innerWidth - window.innerWidth / 2 , Math.random() * window.innerHeight - window.innerHeight / 2, 0);
         skyScene.add(starMesh);
     }
+
+    skyRenderer.render(skyScene, camera);
+    sky.material.map = new THREE.CanvasTexture(skyRenderer.domElement, THREE.UVMapping, THREE.RepeatWrapping, THREE.RepeatWrapping)
 }
 
 
@@ -236,8 +239,16 @@ function init() {
 
     renderer = new THREE.WebGLRenderer({
         antialias: true
-    });
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    }); renderer.setSize(window.innerWidth, window.innerHeight);
+
+    fieldRenderer = new THREE.WebGLRenderer({
+        antialias: true
+    }); fieldRenderer.setSize(window.innerWidth, window.innerHeight);
+
+    skyRenderer = new THREE.WebGLRenderer({
+        antialias: true
+    }); skyRenderer.setSize(window.innerWidth, window.innerHeight);
+
     document.body.appendChild(renderer.domElement);
 
     createScene();
@@ -283,10 +294,10 @@ function onKeyDown(e) {
 
     switch (e.key) {
         case '1': // Frontal Camera
-            generateFieldSceneImage();
+            generateFieldSceneTexture(); // probably fix and put in update, bool here
             break;
         case '2': // Side Camera
-            generateSkySceneImage();
+            generateSkySceneTexture(); // probably fix and put in update, bool here
             break;
         case 'ArrowLeft': // ovni left
             ovni.userData.xNegative = 1;
