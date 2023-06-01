@@ -16,6 +16,70 @@ var pointLight = [];
 
 var clock, delta;
 
+/* */
+
+const starMaterials = [
+]
+
+
+
+function randomChoice(arr) {
+    // get random index value
+    let randomIndex = Math.floor(Math.random() * arr.length);
+
+    // get random item
+    return arr[randomIndex];
+}
+
+function randomNumberGenerator(ll, rl) {
+    return Math.floor(Math.random() * (rl - ll) + ll);
+}
+
+function generateFieldSceneImage(){
+    'use strict';
+
+    let fieldScene = new THREE.Scene();
+    let flowerMaterials = [
+        new THREE.MeshBasicMaterial({color: 'white'}),
+        new THREE.MeshBasicMaterial({color: 'yellow'}),
+        new THREE.MeshBasicMaterial({color: 0xC8A2C8}), // lilac
+        new THREE.MeshBasicMaterial({color: 'lightblue'})
+    ];
+    let flowerGeometry = new THREE.SphereGeometry(1, 1, 1);
+    fieldScene.background = new THREE.Color('lightgreen');
+
+    let numberOfFlowers = randomNumberGenerator(100,1000);
+    for (let i = 0; i < numberOfFlowers; i++){
+
+        let fieldMesh = new THREE.Mesh(flowerGeometry, randomChoice(flowerMaterials));
+        fieldMesh.position.set(Math.random() * window.innerWidth - window.innerWidth / 2 , Math.random() * window.innerHeight - window.innerHeight / 2, 0);
+        fieldScene.add(fieldMesh);
+    }
+
+    renderer.render(fieldScene, camera);
+}
+
+function generateSkySceneImage(){
+    'use strict';
+
+    let skyScene = new THREE.Scene();
+    let skyMaterials = [
+        new THREE.MeshBasicMaterial({color: 'darkblue'}),
+        new THREE.MeshBasicMaterial({color: 'darkviolet'})
+    ]
+    let starGeometry = new THREE.SphereGeometry(1, 1, 1);
+    skyScene.background = new THREE.Texture.gradientmap('ba');
+
+    let numberOfstars = randomNumberGenerator(100,1000);
+    for (let i = 0; i < numberOfstars; i++){
+
+        let starMesh = new THREE.Mesh(starGeometry, randomChoice(skyMaterials));
+        starMesh.position.set(Math.random() * window.innerWidth - window.innerWidth / 2 , Math.random() * window.innerHeight - window.innerHeight / 2, 0);
+        skyScene.add(starMesh);
+    }
+}
+
+
 /////////////////////
 /* CREATE SCENE(S) */
 /////////////////////
@@ -27,7 +91,7 @@ function createScene(){
 
     scene.add(new THREE.AxesHelper(100));
 
-    geometry = new THREE.PlaneGeometry( 128*2, 128*2 );
+    geometry = new THREE.PlaneGeometry(128*2, 128*2);
 
     // frameTexture = texturesGenerator.generateFieldTexture();
     // material = new THREE.MeshBasicMaterial( { map: frameTexture });
@@ -161,7 +225,7 @@ function update(){
 function render() {
     'use strict';
 
-    renderer.render(scene, camera);
+    /*renderer.render(scene, camera);*/
 }
 
 ////////////////////////////////
@@ -196,9 +260,10 @@ function animate() {
 
     delta = clock.getDelta();
 
-    render();
     update();
-    
+    render();
+
+
     requestAnimationFrame(animate);
 }
 
@@ -217,6 +282,12 @@ function onKeyDown(e) {
     'use strict';
 
     switch (e.key) {
+        case '1': // Frontal Camera
+            generateFieldSceneImage();
+            break;
+        case '2': // Side Camera
+            generateSkySceneImage();
+            break;
         case 'ArrowLeft': // ovni left
             ovni.userData.xNegative = 1;
             break;
