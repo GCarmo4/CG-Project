@@ -11,8 +11,8 @@ var frameTexture;
 
 var ovni, cylinder;
 
-var spotLight;
-var pointLight = [];
+var spotLight, spotLightIntensity = 0.8;
+var pointLights = [], pointLightIntensity = 0.25;
 
 var clock, delta;
 
@@ -64,39 +64,30 @@ function createCameras(){
 /////////////////////
 /* CREATE LIGHT(S) */
 /////////////////////
-function createLights(){
-    'use strict';
-
-    createSpotLight();
-    createPointLights();
-}
-
 function createSpotLight() {
     'use strict';
 
-    // spotLight = new THREE.SpotLight( 0xffffff, 1, 0, Math.PI / 6, 0 );
-    // spotLight.position.set( ovni.position.x, ovni.position.y, ovni.position.z );
-    // scene.add( spotLight );
-
-    // scene.add( new THREE.SpotLightHelper( spotLight ) );
-
-    spotLight = new THREE.SpotLight( 0xffffff, 1, 0, Math.PI / 6, 0 );
-    spotLight.position.set( 0, 0, 0 );
+    spotLight = new THREE.SpotLight( 0xffffff, spotLightIntensity, 0, Math.PI / 6, 0 );
     ovni.add( spotLight );
 
-    scene.add( new THREE.SpotLightHelper( spotLight ) );
+    var targetObject = new THREE.Object3D();
+    targetObject.position.set( ovni.position.x, 0, ovni.position.z );
+    ovni.add(targetObject);
+
+    spotLight.target = targetObject;
+
+    scene.add( new THREE.SpotLightHelper( spotLight ) ); // to remove
+
 }
 
-function createPointLights() {
+function createPointLight(smallSphere) {
     'use strict';
 
-    for (var angle = 0; angle < 2 * Math.PI; angle += Math.PI / 6) {
-        var pointLight = new THREE.PointLight( 0xff0000, 1 , 150);
-        pointLight.position.set( ovni.position.x + 18  * Math.cos(angle), ovni.position.y - 2.75, ovni.position.z + 18 * Math.sin(angle) );
-        scene.add( pointLight );
+    var pointLight = new THREE.PointLight( 0xff0000, pointLightIntensity );
+    pointLights.push( pointLight );
+    smallSphere.add( pointLight );
 
-        scene.add( new THREE.PointLightHelper( pointLight, 5 ) );
-    }
+    scene.add( new THREE.PointLightHelper( pointLight, 5 ) ); // to remove
 }
 
 ////////////////////////
@@ -105,7 +96,7 @@ function createPointLights() {
 function createOvni(){
     'use strict';
     
-    material = new THREE.MeshBasicMaterial( {color: 'grey', wireframe: false} );
+    material = new THREE.MeshPhongMaterial( {color: 'grey', wireframe: true} );
     
     var body = new THREE.Mesh( new THREE.SphereGeometry( 28, 32, 16 ), material );
     body.scale.set(1, 4 / 28, 1);
@@ -118,13 +109,16 @@ function createOvni(){
     cylinder.position.set(0, - 4, 0);
     ovni.add( cylinder );
 
-    material = new THREE.MeshBasicMaterial( {color: 'red', wireframe: false} );
+    material = new THREE.MeshPhongMaterial( {color: 'red', wireframe: true} );
 
-    for (var angle = 0; angle < 2 * Math.PI; angle += Math.PI / 6) {
-        var smallLight = new THREE.Mesh( new THREE.SphereGeometry( 2, 32, 16 ), material );
-        smallLight.position.set(18  * Math.cos(angle), - 2.75, 18 * Math.sin(angle));
-        ovni.add( smallLight );
+    for (var angle = 0; angle < 2 * Math.PI; angle += Math.PI / 4) {
+        var smallSphere = new THREE.Mesh( new THREE.SphereGeometry( 2, 32, 16 ), material );
+        smallSphere.position.set( 18  * Math.cos(angle), - 2.75, 18 * Math.sin(angle) );
+        createPointLight(smallSphere);
+        ovni.add( smallSphere );
     }
+
+    createSpotLight();
 }
 
 
@@ -152,7 +146,7 @@ function update(){
 
     ovni.position.x += (ovni.userData.xPositive - ovni.userData.xNegative) * 20 * delta;
     ovni.position.z += (ovni.userData.zPositive - ovni.userData.zNegative) * 20 * delta;
-    //ovni.rotation.y += 0.01;
+    ovni.rotation.y += 0.40 * delta;
 }
 
 /////////////
@@ -178,7 +172,6 @@ function init() {
 
     createScene();
     createCameras();
-    createLights();
 
     render();
 
@@ -230,9 +223,13 @@ function onKeyDown(e) {
             ovni.userData.zPositive = 1;
             break;
 
-        case 'P': case 'p': // toggle out
+        case 'P': case 'p': // activates spotLight and pointLights
+            spotLight.intensity = spotLightIntensity;
+            pointLights.forEach(pointLight => {pointLight.intensity = pointLightIntensity});
             break;
-        case 'S': case 's': // legs in
+        case 'S': case 's': // deactivates spotLight and pointLights
+            spotLight.intensity = 0;
+            pointLights.forEach(pointLight => {pointLight.intensity = 0});
             break;  
     }
 }
