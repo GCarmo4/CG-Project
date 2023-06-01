@@ -82,6 +82,29 @@ function generateSkySceneTexture(){
     sky.material.map = new THREE.CanvasTexture(skyRenderer.domElement, THREE.UVMapping, THREE.RepeatWrapping, THREE.RepeatWrapping)
 }
 
+function createField() {
+    let groundGeo = new THREE.PlaneGeometry(1000, 1000, 9, 9);
+
+    let disMap = new THREE.TextureLoader()
+        .setPath("C:\\Users\\rogst\\Downloads\\heightmap.png") // heightnap folder
+        .load(''); // heightap filename from dat.gui choice
+
+    disMap.wrapS = disMap.wrapT = THREE.RepeatWrapping;
+    disMap.repeat.set(sliders.horTexture, sliders.vertTexture); // # horizontal & vertical textures
+
+    const groundMat = new THREE.MeshStandardMaterial ({
+        color: 0x008800,
+        wireframe: true,
+        displacementMap: disMap,
+        displacementscale: sliders.dispscale
+    });
+
+        groundMesh = new THREE.Mesh(groundGeo, groundMat);
+        scene.add(groundMesh) ;
+        groundMesh.rotation.x = -Math.PI / 2;
+        groundMesh.position.y = -0.5
+    }
+
 
 /////////////////////
 /* CREATE SCENE(S) */
@@ -94,12 +117,14 @@ function createScene(){
 
     scene.add(new THREE.AxesHelper(100));
 
-    geometry = new THREE.PlaneGeometry(128*2, 128*2);
+    geometry = new THREE.PlaneBufferGeometry(128, 128, 3, 3);
 
-    // frameTexture = texturesGenerator.generateFieldTexture();
-    // material = new THREE.MeshBasicMaterial( { map: frameTexture });
 
-    material = new THREE.MeshPhongMaterial( { color: 'green' });
+    let texture = new THREE.TextureLoader().load('textures/heightmap.png' );
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+
+    material = new THREE.MeshBasicMaterial( { color: texture} );
 
     mesh = new THREE.Mesh( geometry, material );
     mesh.rotation.x = - Math.PI / 2;
@@ -228,7 +253,7 @@ function update(){
 function render() {
     'use strict';
 
-    /*renderer.render(scene, camera);*/
+    renderer.render(scene, camera);
 }
 
 ////////////////////////////////
