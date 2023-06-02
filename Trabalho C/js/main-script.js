@@ -41,11 +41,8 @@ function createScene(){
 
     scene.add( mesh );
 
-    ovni = new THREE.Object3D();
-    ovni.userData = { xPositive: 0, xNegative: 0, zPositive: 0, zNegative: 0 };
-    createOvni();
-    ovni.position.set(0, 100, 0);
-    scene.add(ovni);
+    createHouse();
+
 }
 
 //////////////////////
@@ -166,8 +163,9 @@ function createHouseSides(){
 
     geom.setAttribute( 'position', new THREE.Float32BufferAttribute( vertices, 3 ) );
     geom.setIndex(indices);
+    geom.computeVertexNormals();
 
-    const material = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
+    const material = new THREE.MeshLambertMaterial( { color: 'white' });
 
     lSide = new THREE.Mesh( geom, material );
 
@@ -243,8 +241,9 @@ function createHouseFront(){
 
     geom.setAttribute( 'position', new THREE.Float32BufferAttribute( vertices, 3 ) );
     geom.setIndex(indices);
+    geom.computeVertexNormals();
 
-    const material = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
+    const material = new THREE.MeshLambertMaterial( { color: 'white' } );
 
     front = new THREE.Mesh( geom, material );
 
@@ -272,8 +271,9 @@ function createHouseBack(){
 
     geom.setAttribute( 'position', new THREE.Float32BufferAttribute( vertices, 3 ) );
     geom.setIndex(indices);
+    geom.computeVertexNormals();
 
-    const material = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
+    const material = new THREE.MeshLambertMaterial( { color: 'white' } );
 
     back = new THREE.Mesh( geom, material );
 
@@ -307,8 +307,9 @@ function createHouseRoof(){
 
     geom.setAttribute( 'position', new THREE.Float32BufferAttribute( vertices, 3 ) );
     geom.setIndex(indices);
+    geom.computeVertexNormals();
 
-    const material = new THREE.MeshBasicMaterial( { color: 'brown'});
+    const material = new THREE.MeshLambertMaterial( { color: 'orange'});
 
     roof = new THREE.Mesh( geom, material );
 
@@ -356,8 +357,9 @@ function createHouseChimney(){
 
     geom.setAttribute( 'position', new THREE.Float32BufferAttribute( vertices, 3 ) );
     geom.setIndex(indices);
+    geom.computeVertexNormals();
 
-    const material = new THREE.MeshBasicMaterial( { color: 0xff0000 });
+    const material = new THREE.MeshLambertMaterial( { color: 'white' });
 
     chimney = new THREE.Mesh( geom, material );
 
@@ -403,8 +405,9 @@ function createHouseWindows(){
 
     geom.setAttribute( 'position', new THREE.Float32BufferAttribute( vertices, 3 ) );
     geom.setIndex(indices);
+    geom.computeVertexNormals();
 
-    const material = new THREE.MeshBasicMaterial( { color: 'blue' } );
+    const material = new THREE.MeshLambertMaterial( { color: 'blue' } );
 
     windows = new THREE.Mesh( geom, material );
 
@@ -434,8 +437,9 @@ function createHouseDoor(){
 
     geom.setAttribute( 'position', new THREE.Float32BufferAttribute( vertices, 3 ) );
     geom.setIndex(indices);
+    geom.computeVertexNormals();
 
-    const material = new THREE.MeshBasicMaterial( { color: 'brown' } );
+    const material = new THREE.MeshLambertMaterial( { color: 'brown' } );
 
     door = new THREE.Mesh( geom, material );
 
@@ -465,9 +469,6 @@ function handleCollisions(){
 function update(){
     'use strict';
 
-    ovni.position.x += (ovni.userData.xPositive - ovni.userData.xNegative) * 20 * delta;
-    ovni.position.z += (ovni.userData.zPositive - ovni.userData.zNegative) * 20 * delta;
-    //ovni.rotation.y += 0.01;
 }
 
 /////////////
@@ -493,9 +494,10 @@ function init() {
 
     createScene();
     createCameras();
-    createLights();
 
-    createHouse();
+    var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.7 );
+    directionalLight.position.set( 1, 1, 1 );
+    scene.add( directionalLight );
 
     render();
 
