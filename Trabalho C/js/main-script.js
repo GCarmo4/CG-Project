@@ -2,7 +2,7 @@
 /* GLOBAL VARIABLES */
 //////////////////////
 
-var camera, scene, renderer, skyRenderer;
+var camera, scene, renderer;
 
 var geometry, material, mesh;
 
@@ -86,6 +86,16 @@ function createFieldCamera() {
     return fieldCamera;
 }
 
+function createSkyCamera() {
+    'use strict';
+
+    let skyCamera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 1000 );
+    skyCamera.position.set(0, 0, 200);
+    skyCamera.lookAt(0, 0, 0);
+
+    return skyCamera;
+}
+
 function generateFieldSceneTexture(){
     'use strict';
 
@@ -112,29 +122,47 @@ function saveTexture(r) {
     }, 'image/png', 1.0);
 }
 
-
-function generateSkySceneTexture(){
-    'use strict';
-
+function createSkyScene() {
     let skyScene = new THREE.Scene();
-    let skyMaterials = [
+    /*let skyMaterials = [
         new THREE.MeshBasicMaterial({color: 'darkblue'}),
         new THREE.MeshBasicMaterial({color: 'darkviolet'})
+    ]*/
+
+    let starMaterials = [
+        new THREE.MeshBasicMaterial({color: 'white'})
     ]
     let starGeometry = new THREE.SphereGeometry(1, 1, 1);
-    //fixme skyScene.background = new THREE.Texture.gradientmap('ba');
+
+    // o background com textura nao funciona nao entendo so falta isto, o resto esta feito
+    skyScene.background = new THREE.TextureLoader().load('textures/skyBackground.png'); // depois logo se pergunta se pode ser so assim
 
     let numberOfstars = randomNumberGenerator(100,1000);
     for (let i = 0; i < numberOfstars; i++){
-
-        let starMesh = new THREE.Mesh(starGeometry, randomChoice(skyMaterials));
+        let starMesh = new THREE.Mesh(starGeometry, randomChoice(starMaterials));
         starMesh.position.set(Math.random() * window.innerWidth - window.innerWidth / 2 , Math.random() * window.innerHeight - window.innerHeight / 2, 0);
         skyScene.add(starMesh);
     }
 
-    skyRenderer.render(skyScene, camera);
-    sky.material.map = new THREE.CanvasTexture(skyRenderer.domElement, THREE.UVMapping, THREE.RepeatWrapping, THREE.RepeatWrapping)
-    doneGeneratingSky();
+    return skyScene;
+}
+
+function generateSkySceneTexture(){
+    'use strict';
+
+    let skyRenderer = new THREE.WebGLRenderer({
+        antialias: true
+    }); skyRenderer.setSize(window.innerWidth, window.innerHeight);
+
+    let skyScene = createSkyScene();
+    let skyCamera = createSkyCamera();
+
+    // skyScene.background = new THREE.TextureLoader().load('textures/skyBackground.png'); nao funciona
+
+
+    skyRenderer.render(skyScene, skyCamera);
+    // saveTexture(skyRenderer)
+    return new THREE.CanvasTexture(skyRenderer.domElement, THREE.UVMapping, THREE.RepeatWrapping, THREE.RepeatWrapping) // this is not getting the colors
 }
 
 
@@ -158,16 +186,28 @@ function createField() {
     scene.add( field );
 }
 
+function createSky() {
+    geometry = new THREE.SphereGeometry(128*2, 128*2, 128*2);
+
+    // color para desenrascar por enquanto
+    material = new THREE.MeshBasicMaterial( {color: 'lightblue', side: THREE.BackSide} );
+
+    sky = new THREE.Mesh( geometry, material );
+
+    scene.add( sky );
+}
+
 function createScene(){
     'use strict';
 
     scene = new THREE.Scene();
 
-    scene.background = new THREE.Color('white')
+    scene.background = new THREE.Color('white'); // doesn't quite matter
 
     // scene.add(new THREE.AxesHelper(100));
 
     createField();
+    createSky();
 /*
     ovni = new THREE.Object3D();
     ovni.userData = { xPositive: 0, xNegative: 0, zPositive: 0, zNegative: 0 };
@@ -325,9 +365,6 @@ function init() {
         antialias: true
     }); renderer.setSize(window.innerWidth, window.innerHeight);
 
-    skyRenderer = new THREE.WebGLRenderer({
-        antialias: true
-    }); skyRenderer.setSize(window.innerWidth, window.innerHeight);
 
     document.body.appendChild(renderer.domElement);
 
