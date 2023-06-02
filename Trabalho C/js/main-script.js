@@ -135,7 +135,10 @@ function createSkyScene() {
     let starGeometry = new THREE.SphereGeometry(1, 1, 1);
 
     // o background com textura nao funciona nao entendo so falta isto, o resto esta feito
-    skyScene.background = new THREE.TextureLoader().load('textures/skyBackground.png'); // depois logo se pergunta se pode ser so assim
+    // skyScene.background = new THREE.TextureLoader().load('textures/skyBackground.png'); // depois logo se pergunta se pode ser so assim
+
+    //skyScene.background = new THREE.TextureLoader().load('textures/skyBackground.png'); //  nao funciona
+    skyScene.background = new THREE.Color('darkblue');
 
     let numberOfstars = randomNumberGenerator(100,1000);
     for (let i = 0; i < numberOfstars; i++){
@@ -157,11 +160,10 @@ function generateSkySceneTexture(){
     let skyScene = createSkyScene();
     let skyCamera = createSkyCamera();
 
-    skyScene.background = new THREE.TextureLoader().load('textures/skyBackground.png'); //  nao funciona
-
+    //skyScene.background = new THREE.TextureLoader().load('textures/skyBackground.png'); //  nao funciona
 
     skyRenderer.render(skyScene, skyCamera);
-    // saveTexture(skyRenderer)
+    //saveTexture(skyRenderer)
     return new THREE.CanvasTexture(skyRenderer.domElement, THREE.UVMapping, THREE.RepeatWrapping, THREE.RepeatWrapping) // this is not getting the colors
 }
 
@@ -190,9 +192,11 @@ function createField() {
 function createSky() {
     geometry = new THREE.SphereGeometry(128*2, 128*2, 128*2, 0, 2*Math.PI, 0, 0.5 * Math.PI);
 
+    // take out after
+    let texture = new THREE.TextureLoader().load('textures/skyBackground.png');
 
     // color para desenrascar por enquanto
-    material = new THREE.MeshBasicMaterial( {color: 'lightblue', side: THREE.BackSide} );
+    material = new THREE.MeshBasicMaterial( {map: texture, side: THREE.BackSide} );
 
     sky = new THREE.Mesh( geometry, material );
 
