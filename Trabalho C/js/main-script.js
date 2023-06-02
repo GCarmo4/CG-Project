@@ -157,7 +157,7 @@ function generateSkySceneTexture(){
     let skyScene = createSkyScene();
     let skyCamera = createSkyCamera();
 
-    // skyScene.background = new THREE.TextureLoader().load('textures/skyBackground.png'); nao funciona
+    skyScene.background = new THREE.TextureLoader().load('textures/skyBackground.png'); //  nao funciona
 
 
     skyRenderer.render(skyScene, skyCamera);
@@ -178,6 +178,7 @@ function createField() {
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
 
+
     material = new THREE.MeshStandardMaterial( {map: texture, displacementMap: texture, displacementScale:200} );
 
     field = new THREE.Mesh( geometry, material );
@@ -187,7 +188,8 @@ function createField() {
 }
 
 function createSky() {
-    geometry = new THREE.SphereGeometry(128*2, 128*2, 128*2);
+    geometry = new THREE.SphereGeometry(128*2, 128*2, 128*2, 0, 2*Math.PI, 0, 0.5 * Math.PI);
+
 
     // color para desenrascar por enquanto
     material = new THREE.MeshBasicMaterial( {color: 'lightblue', side: THREE.BackSide} );
