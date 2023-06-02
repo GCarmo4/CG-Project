@@ -6,11 +6,11 @@ var camera, scene, renderer;
 
 var geometry, material, mesh;
 
-var texturesGenerator = new TexturesGenerator();
-var frameTexture;
+var moon;
 
 var ovni, cylinder;
 
+var directionalLight, directionalLightIntensity = 0.5;
 var spotLight, spotLightIntensity = 0.8;
 var pointLights = [], pointLightIntensity = 0.25;
 
@@ -27,7 +27,7 @@ function createScene(){
 
     scene.add(new THREE.AxesHelper(100));
 
-    geometry = new THREE.PlaneGeometry( 128*2, 128*2 );
+    geometry = new THREE.PlaneGeometry( 128*8, 128*8 );
 
     // frameTexture = texturesGenerator.generateFieldTexture();
     // material = new THREE.MeshBasicMaterial( { map: frameTexture });
@@ -39,11 +39,10 @@ function createScene(){
 
     scene.add( mesh );
 
-    ovni = new THREE.Object3D();
-    ovni.userData = { xPositive: 0, xNegative: 0, zPositive: 0, zNegative: 0 };
+    createMoon();
+    
     createOvni();
-    ovni.position.set(0, 100, 0);
-    scene.add(ovni);
+
 }
 
 //////////////////////
@@ -53,7 +52,7 @@ function createCameras(){
     'use strict';
 
     camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 1000 );
-    camera.position.set(140, 140, 140);
+    camera.position.set(280, 280, 280);
     camera.lookAt(scene.position);
 
     const controls = new THREE.OrbitControls( camera, renderer.domElement );
@@ -64,10 +63,25 @@ function createCameras(){
 /////////////////////
 /* CREATE LIGHT(S) */
 /////////////////////
+function createDirectionalLight(){
+    'use strict';
+
+    directionalLight = new THREE.DirectionalLight( 0xffffff, directionalLightIntensity );
+    directionalLight.position.set( 1, 1, -1 );
+    scene.add( directionalLight );
+}
+
+function createAmbientLight(){
+    'use strict';
+
+    var ambientLight = new THREE.AmbientLight(0xFFFFFF, 0.3);
+    scene.add( ambientLight );
+}
+
 function createSpotLight() {
     'use strict';
 
-    spotLight = new THREE.SpotLight( 0xffffff, spotLightIntensity, 0, Math.PI / 6, 0 );
+    spotLight = new THREE.SpotLight( 0xffffff, spotLightIntensity, 0, Math.PI / 6, 0.1 );
     ovni.add( spotLight );
 
     var targetObject = new THREE.Object3D();
@@ -83,7 +97,7 @@ function createSpotLight() {
 function createPointLight(smallSphere) {
     'use strict';
 
-    var pointLight = new THREE.PointLight( 0xff0000, pointLightIntensity );
+    var pointLight = new THREE.PointLight( 0xff0000, pointLightIntensity, 200 );
     pointLights.push( pointLight );
     smallSphere.add( pointLight );
 
@@ -96,7 +110,10 @@ function createPointLight(smallSphere) {
 function createOvni(){
     'use strict';
     
-    material = new THREE.MeshPhongMaterial( {color: 'grey', wireframe: true} );
+    ovni = new THREE.Object3D();
+    ovni.userData = { xPositive: 0, xNegative: 0, zPositive: 0, zNegative: 0 };
+    
+    material = new THREE.MeshPhongMaterial( {color: 'grey', wireframe: false} );
     
     var body = new THREE.Mesh( new THREE.SphereGeometry( 28, 32, 16 ), material );
     body.scale.set(1, 4 / 28, 1);
@@ -109,7 +126,7 @@ function createOvni(){
     cylinder.position.set(0, - 4, 0);
     ovni.add( cylinder );
 
-    material = new THREE.MeshPhongMaterial( {color: 'red', wireframe: true} );
+    material = new THREE.MeshPhongMaterial( {color: 'red', wireframe: false} );
 
     for (var angle = 0; angle < 2 * Math.PI; angle += Math.PI / 4) {
         var smallSphere = new THREE.Mesh( new THREE.SphereGeometry( 2, 32, 16 ), material );
@@ -119,8 +136,34 @@ function createOvni(){
     }
 
     createSpotLight();
+    ovni.position.set(0, 100, 0);
+    scene.add(ovni);
 }
 
+function createMoon(){
+    'use strict';
+
+    material = new THREE.MeshPhongMaterial( {color: 'palegoldenrod', 
+        emissive: 'palegoldenrod',
+        emissiveIntensity: 0.75,
+        shininess: 50,
+        specular: 'palegoldenrod', 
+        wireframe: false} );
+
+    moon = new THREE.Mesh( new THREE.SphereGeometry( 56, 32, 16 ), material );
+    moon.position.set( -200, 200, 0 );
+    scene.add( moon );
+
+    // to remove
+    var gui = new dat.GUI();
+    gui.add( material, 'emissiveIntensity', 0, 1 );
+    gui.add( material, 'shininess', 0, 100 );
+    gui.add( material, 'wireframe' );
+    gui.addColor( material, 'color' );
+    gui.addColor( material, 'emissive' );
+    gui.addColor( material, 'specular' );
+
+}
 
 //////////////////////
 /* CHECK COLLISIONS */
@@ -172,6 +215,8 @@ function init() {
 
     createScene();
     createCameras();
+    createDirectionalLight();
+    createAmbientLight();
 
     render();
 
@@ -223,13 +268,16 @@ function onKeyDown(e) {
             ovni.userData.zPositive = 1;
             break;
 
+        case 'D': case 'd': // toggle directionalLight
+            directionalLight.visible = !directionalLight.visible;
+
         case 'P': case 'p': // activates spotLight and pointLights
-            spotLight.intensity = spotLightIntensity;
-            pointLights.forEach(pointLight => {pointLight.intensity = pointLightIntensity});
+            spotLight.visible = true;
+            pointLights.forEach(pointLight => {pointLight.visible = true});
             break;
         case 'S': case 's': // deactivates spotLight and pointLights
-            spotLight.intensity = 0;
-            pointLights.forEach(pointLight => {pointLight.intensity = 0});
+            spotLight.visible = false;
+            pointLights.forEach(pointLight => {pointLight.visible = false});
             break;  
     }
 }
