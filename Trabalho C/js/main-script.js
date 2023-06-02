@@ -224,7 +224,6 @@ function createScene(){
     createField();
     createSky();
     createHouse();
-
 }
 
 //////////////////////
@@ -330,6 +329,8 @@ function createHouse(){
     createHouseChimney();
     createHouseWindows();
     createHouseDoor();
+
+    house.position.set(10, 17, 0)
 
     scene.add(house);
 }
@@ -703,10 +704,7 @@ function init() {
 
     createScene();
     createCameras();
-
-    var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.7 );
-    directionalLight.position.set( 1, 1, 1 );
-    scene.add( directionalLight );
+    createLights();
 
     render();
 
