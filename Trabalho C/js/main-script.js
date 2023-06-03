@@ -8,7 +8,7 @@ var geometry, material, mesh;
 
 var moon;
 
-var ovni, cylinder;
+var ovni;
 
 var directionalLight, directionalLightIntensity = 0.5;
 var spotLight, spotLightIntensity = 0.8;
@@ -40,7 +40,9 @@ function createScene(){
     scene.add( mesh );
 
     createMoon();
-    
+
+    createTrees();
+
     createOvni();
 
 }
@@ -107,39 +109,6 @@ function createPointLight(smallSphere) {
 ////////////////////////
 /* CREATE OBJECT3D(S) */
 ////////////////////////
-function createOvni(){
-    'use strict';
-    
-    ovni = new THREE.Object3D();
-    ovni.userData = { xPositive: 0, xNegative: 0, zPositive: 0, zNegative: 0 };
-    
-    material = new THREE.MeshPhongMaterial( {color: 'grey', wireframe: false} );
-    
-    var body = new THREE.Mesh( new THREE.SphereGeometry( 28, 32, 16 ), material );
-    body.scale.set(1, 4 / 28, 1);
-    ovni.add( body );
-
-    var cockpit = new THREE.Mesh( new THREE.SphereGeometry( 10, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2 ), material );
-    ovni.add( cockpit );
-
-    cylinder = new THREE.Mesh( new THREE.CylinderGeometry( 6, 6, 4, 32 ), material );
-    cylinder.position.set(0, - 4, 0);
-    ovni.add( cylinder );
-
-    material = new THREE.MeshPhongMaterial( {color: 'red', wireframe: false} );
-
-    for (var angle = 0; angle < 2 * Math.PI; angle += Math.PI / 4) {
-        var smallSphere = new THREE.Mesh( new THREE.SphereGeometry( 2, 32, 16 ), material );
-        smallSphere.position.set( 18  * Math.cos(angle), - 2.75, 18 * Math.sin(angle) );
-        createPointLight(smallSphere);
-        ovni.add( smallSphere );
-    }
-
-    createSpotLight();
-    ovni.position.set(0, 100, 0);
-    scene.add(ovni);
-}
-
 function createMoon(){
     'use strict';
 
@@ -162,7 +131,106 @@ function createMoon(){
     gui.addColor( material, 'color' );
     gui.addColor( material, 'emissive' );
     gui.addColor( material, 'specular' );
+}
 
+function createTrees(){
+    'use strict';
+
+    var n = THREE.MathUtils.randInt(40, 80);
+    for (var i = 0; i < n; i++) {
+        var size = THREE.MathUtils.randFloat(1, 2);
+        var x = THREE.MathUtils.randInt(-400, 400);
+        var z = THREE.MathUtils.randInt(-400, 400);
+        if ((x > -20 && x < 20 ) || (z > -30 && z < 30)) 
+            continue;
+        var orientation = THREE.MathUtils.randFloat(0, 2 * Math.PI);
+
+        createTree( size, x, z, orientation);
+    }
+}
+function createTree(size, x, z, orientation){
+    'use strict';
+
+    var tree = new THREE.Object3D();
+    
+    material = new THREE.MeshLambertMaterial( {color: 'sienna', wireframe: false} );
+
+    var rootTrunk = new THREE.Mesh( new THREE.CylinderGeometry( 2, 2, 4, 64 ), material );
+    rootTrunk.position.set( 0, 2, 0);
+    tree.add( rootTrunk );
+
+    material = new THREE.MeshLambertMaterial( {color: 'sienna', wireframe: false} );
+
+    var angle = Math.PI / 6;
+    var radius =  2 * Math.cos(angle);
+    var height = 12;
+    var mainTrunk = new THREE.Mesh( new THREE.CylinderGeometry( radius, radius, height, 64 ), material );
+    mainTrunk.rotation.z = angle;
+    mainTrunk.position.set( 2 - (radius * Math.cos(angle) + height / 2 * Math.sin(angle)), 2 - (radius * Math.sin(angle) - height / 2 * Math.cos(angle)), 0 );
+    rootTrunk.add( mainTrunk );
+
+    var secundaryTrunk = new THREE.Mesh( new THREE.CylinderGeometry( radius / 2, radius / 2, height, 64 ), material );
+    secundaryTrunk.rotation.z = Math.PI / 2 + angle;
+    secundaryTrunk.position.set( 4, -2, 0 );
+    mainTrunk.add( secundaryTrunk );
+
+    material = new THREE.MeshLambertMaterial( {color: 'darkgreen', wireframe: false} );
+
+    var mainTop = new THREE.Mesh( new THREE.SphereGeometry( 7, 32, 16 ), material );
+    mainTop.scale.set( 1, 5 / 7, 5 / 7 );
+    mainTop.rotation.z = - angle;
+    mainTop.position.set( 0, height / 2 + 4, 0 );
+    mainTrunk.add( mainTop );
+
+    var secundaryTop = new THREE.Mesh( new THREE.SphereGeometry( 7, 32, 16 ), material );
+    secundaryTop.scale.set( 1, 5 / 7, 5 / 7 );
+    secundaryTop.rotation.z = angle;
+    secundaryTop.position.set( 0, - height / 2 - 4, 0 );
+    secundaryTrunk.add( secundaryTop );
+
+    var thirdTop = new THREE.Mesh( new THREE.SphereGeometry( 7, 32, 16 ), material );
+    thirdTop.scale.set( 1, 5 / 7, 5 / 7 );
+    thirdTop.position.set( 0, 4 + height + radius, 0 );
+    rootTrunk.add( thirdTop );
+
+    tree.scale.set(size, size, size);
+    tree.rotation.y = orientation;
+    tree.position.set(x, 0, z);
+    scene.add( tree );
+
+}
+
+function createOvni(){
+    'use strict';
+    
+    ovni = new THREE.Object3D();
+    ovni.userData = { xPositive: 0, xNegative: 0, zPositive: 0, zNegative: 0 };
+    
+    material = new THREE.MeshPhongMaterial( {color: 'grey', wireframe: false} );
+    
+    var body = new THREE.Mesh( new THREE.SphereGeometry( 28, 32, 16 ), material );
+    body.scale.set(1, 4 / 28, 1);
+    ovni.add( body );
+
+    var cockpit = new THREE.Mesh( new THREE.SphereGeometry( 10, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2 ), material );
+    ovni.add( cockpit );
+
+    var cylinder = new THREE.Mesh( new THREE.CylinderGeometry( 6, 6, 4, 32 ), material );
+    cylinder.position.set(0, - 4, 0);
+    ovni.add( cylinder );
+
+    material = new THREE.MeshPhongMaterial( {color: 'red', wireframe: false} );
+
+    for (var angle = 0; angle < 2 * Math.PI; angle += Math.PI / 4) {
+        var smallSphere = new THREE.Mesh( new THREE.SphereGeometry( 2, 32, 16 ), material );
+        smallSphere.position.set( 18  * Math.cos(angle), - 2.75, 18 * Math.sin(angle) );
+        createPointLight(smallSphere);
+        ovni.add( smallSphere );
+    }
+
+    createSpotLight();
+    ovni.position.set(0, 100, 0);
+    scene.add(ovni);
 }
 
 //////////////////////
