@@ -69,7 +69,7 @@ function createFieldScene() {
         new THREE.MeshBasicMaterial({color: 0xC8A2C8}), // lilac
         new THREE.MeshBasicMaterial({color: 'lightblue'})
     ];
-    let flowerGeometry = new THREE.SphereGeometry(1, 1, 1);
+    let flowerGeometry = new THREE.SphereGeometry(1);
     fieldScene.background = new THREE.Color('lightgreen');
 
     let numberOfFlowers = randomNumberGenerator(1000,2000);
@@ -189,7 +189,7 @@ function generateSkySceneTexture(){
 /////////////////////
 
 function createField() {
-    geometry = new THREE.PlaneGeometry(128*8, 128*8, 128*8/10, 128*8/10);
+    geometry = new THREE.PlaneGeometry(128*10, 128*10, 128*10/10, 128*10/10);
 
     let texture = new THREE.TextureLoader().load('textures/heightmap.png' );
     texture.wrapS = THREE.RepeatWrapping;
@@ -245,7 +245,7 @@ function createScene(){
 function createCameras(){
     'use strict';
 
-    camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 1000 );
+    camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 2000 );
     camera.position.set(280, 280, 280);
     camera.lookAt(scene.position);
 
@@ -330,7 +330,7 @@ function createTrees(){
 
     var n = THREE.MathUtils.randInt(40, 80);
     for (var i = 0; i < n; i++) {
-        var size = THREE.MathUtils.randFloat(1, 1.5);
+        var size = THREE.MathUtils.randFloat(0.8, 1.2);
         var x = THREE.MathUtils.randInt(-400, 400);
         var z = THREE.MathUtils.randInt(-400, 400);
         if ((x > -20 && x < 20 ) || (z > -30 && z < 30)) 
