@@ -138,7 +138,7 @@ function createTrees(){
 
     var n = THREE.MathUtils.randInt(40, 80);
     for (var i = 0; i < n; i++) {
-        var size = THREE.MathUtils.randFloat(1, 2);
+        var size = THREE.MathUtils.randFloat(1, 1.5);
         var x = THREE.MathUtils.randInt(-400, 400);
         var z = THREE.MathUtils.randInt(-400, 400);
         if ((x > -20 && x < 20 ) || (z > -30 && z < 30)) 
