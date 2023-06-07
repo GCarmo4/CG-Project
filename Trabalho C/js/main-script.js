@@ -27,6 +27,8 @@ var moon;
 
 var trees = [];
 
+var house, lSide, rSide, front, back, roof, chimney, windows, door, house;
+
 var ovni;
 
 var directionalLight, directionalLightIntensity = 0.5;
@@ -34,8 +36,6 @@ var spotLight, spotLightIntensity = 0.8;
 var pointLights = [], pointLightIntensity = 0.25;
 
 var clock, delta;
-
-var lSide, rSide, front, back, roof, chimney, windows, door, house;
 
 var materials = [];
 var phongMaterials = [];
@@ -241,8 +241,6 @@ function createScene(){
     'use strict';
 
     scene = new THREE.Scene();
-
-    scene.background = new THREE.Color('white'); // doesn't quite matter
 
     scene.add(new THREE.AxesHelper(100)); // to remove
 
@@ -511,8 +509,6 @@ function createHouse(){
     createHouseChimney();
     createHouseWindows();
     createHouseDoor();
-
-    house.position.set(10, 17, 0);
 
     scene.add(house);
 }
@@ -861,12 +857,12 @@ function render() {
 function init() {
     'use strict';
 
-    renderer = new THREE.WebGLRenderer({
-        antialias: true
-    }); renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer = new THREE.WebGLRenderer( { antialias: true } );
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    document.body.appendChild( renderer.domElement );
 
-
-    document.body.appendChild(renderer.domElement);
+    renderer.xr.enabled = true;
+    document.body.appendChild( VRButton.createButton( renderer ) );
 
     doneGeneratingField();
     doneGeneratingSky();
@@ -875,8 +871,6 @@ function init() {
     createCameras();
     createDirectionalLight();
     createAmbientLight();
-
-    render();
 
     clock = new THREE.Clock();
 
@@ -891,12 +885,14 @@ function init() {
 function animate() {
     'use strict';
 
-    delta = clock.getDelta();
+    renderer.setAnimationLoop( function () {
 
-    update();
-    render();
+        delta = clock.getDelta();
 
-    requestAnimationFrame(animate);
+        update();
+        render();
+    
+    } );
 }
 
 ////////////////////////////
