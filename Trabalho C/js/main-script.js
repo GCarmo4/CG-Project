@@ -1,3 +1,15 @@
+/*
+                    Trabalho B                  
+Cena Interactiva com Malhas, Materiais, Luzes, 
+Texturas e Camara Estereoscopica
+        Computacao Grafica - L11 - Grupo 24
+
+92424 Andre Azevedo 10h
+99228 Gonçalo Carmo 10h
+99245 João Santos 10h
+horas despendidas pelo grupo(media do grupo): 10h
+*/
+
 //////////////////////
 /* GLOBAL VARIABLES */
 //////////////////////
@@ -13,6 +25,8 @@ var field, sky;
 
 var moon;
 
+var trees = [];
+
 var ovni;
 
 var directionalLight, directionalLightIntensity = 0.5;
@@ -22,6 +36,12 @@ var pointLights = [], pointLightIntensity = 0.25;
 var clock, delta;
 
 var lSide, rSide, front, back, roof, chimney, windows, door, house;
+
+var materials = [];
+var phongMaterials = [];
+var lambertMaterials = [];
+var toonMaterials = [];
+var basicMaterials = [];
 
 const TEXTURES_PATH = "C:\\Users\\rogst\\Documents\\cgraf\\CG\\Trabalho C\\";
 
@@ -251,7 +271,7 @@ function createCameras(){
 
     const controls = new THREE.OrbitControls( camera, renderer.domElement );
     controls.minDistance = 20;
- 	  controls.maxDistance = 1000;
+ 	controls.maxDistance = 1000;
 }
 
 /////////////////////
@@ -301,33 +321,86 @@ function createPointLight(smallSphere) {
 ////////////////////////
 /* CREATE OBJECT3D(S) */
 ////////////////////////
+function createMaterial(parameters) {
+    'use strict';
+
+    material = new THREE.MeshLambertMaterial( parameters );
+    lambertMaterials.push(material);
+    materials.push(material);
+    
+    material = new THREE.MeshPhongMaterial( parameters );
+    phongMaterials.push(material);
+
+    material = new THREE.MeshToonMaterial( parameters );
+    toonMaterials.push(material);
+
+    material = new THREE.MeshBasicMaterial( parameters );
+    basicMaterials.push(material);
+}
+
+function updateObjectMaterials(object, newMaterials) {
+    'use strict';
+
+    if (object instanceof THREE.Mesh) {
+        object.material = newMaterials[materials.indexOf(object.material)];
+    }
+
+    for (var i = 0; i < object.children.length; i++) {
+        updateObjectMaterials(object.children[i], newMaterials);
+    }
+}
+
+function updateMaterials(newMaterials) { 
+    'use strict';
+
+    updateObjectMaterials(moon, newMaterials);
+
+    for (var i = 0; i < trees.length; i++)
+        updateObjectMaterials(trees[i], newMaterials);
+
+    updateObjectMaterials(ovni, newMaterials);
+    
+    updateObjectMaterials(house, newMaterials);
+}
+
 function createMoon(){
     'use strict';
 
-    material = new THREE.MeshPhongMaterial( {color: 'palegoldenrod', 
-        emissive: 'palegoldenrod',
-        emissiveIntensity: 0.75,
-        shininess: 50,
-        specular: 'palegoldenrod', 
-        wireframe: false} );
+    // material = new THREE.MeshPhongMaterial( {color: 'palegoldenrod', 
+    //     emissive: 'palegoldenrod',
+    //     emissiveIntensity: 0.75,
+    //     shininess: 50,
+    //     specular: 'palegoldenrod', 
+    //     wireframe: false} );
+    // materials.push(material);
 
-    moon = new THREE.Mesh( new THREE.SphereGeometry( 56, 32, 16 ), material );
+    createMaterial( {color: 'palegoldenrod', 
+    emissive: 'palegoldenrod',
+    emissiveIntensity: 0.75,
+    shininess: 50,
+    specular: 'palegoldenrod', 
+    wireframe: false} );
+
+    moon = new THREE.Mesh( new THREE.SphereGeometry( 56, 32, 16 ), materials[0] );
     moon.position.set( -200, 200, 0 );
     scene.add( moon );
 
     // to remove
-    var gui = new dat.GUI();
-    gui.add( material, 'emissiveIntensity', 0, 1 );
-    gui.add( material, 'shininess', 0, 100 );
-    gui.add( material, 'wireframe' );
-    gui.addColor( material, 'color' );
-    gui.addColor( material, 'emissive' );
-    gui.addColor( material, 'specular' );
+    // var gui = new dat.GUI();
+    // gui.add( material, 'emissiveIntensity', 0, 1 );
+    // gui.add( material, 'shininess', 0, 100 );
+    // gui.add( material, 'wireframe' );
+    // gui.addColor( material, 'color' );
+    // gui.addColor( material, 'emissive' );
+    // gui.addColor( material, 'specular' );
 }
 
 function createTrees(){
     'use strict';
 
+    createMaterial( {color: 'sienna', wireframe: false} );
+    createMaterial( {color: 'darkgreen', wireframe: false} );
+    
     var n = THREE.MathUtils.randInt(40, 80);
     for (var i = 0; i < n; i++) {
         var size = THREE.MathUtils.randFloat(0.8, 1.2);
@@ -340,47 +413,42 @@ function createTrees(){
         createTree( size, x, z, orientation);
     }
 }
+
 function createTree(size, x, z, orientation){
     'use strict';
 
     var tree = new THREE.Object3D();
     
-    material = new THREE.MeshLambertMaterial( {color: 'sienna', wireframe: false} );
-
-    var rootTrunk = new THREE.Mesh( new THREE.CylinderGeometry( 2, 2, 4, 64 ), material );
+    var rootTrunk = new THREE.Mesh( new THREE.CylinderGeometry( 2, 2, 4, 64 ), materials[1] );
     rootTrunk.position.set( 0, 2, 0);
     tree.add( rootTrunk );
-
-    material = new THREE.MeshLambertMaterial( {color: 'sienna', wireframe: false} );
 
     var angle = Math.PI / 6;
     var radius =  2 * Math.cos(angle);
     var height = 12;
-    var mainTrunk = new THREE.Mesh( new THREE.CylinderGeometry( radius, radius, height, 64 ), material );
+    var mainTrunk = new THREE.Mesh( new THREE.CylinderGeometry( radius, radius, height, 64 ), materials[1] );
     mainTrunk.rotation.z = angle;
     mainTrunk.position.set( 2 - (radius * Math.cos(angle) + height / 2 * Math.sin(angle)), 2 - (radius * Math.sin(angle) - height / 2 * Math.cos(angle)), 0 );
     rootTrunk.add( mainTrunk );
 
-    var secundaryTrunk = new THREE.Mesh( new THREE.CylinderGeometry( radius / 2, radius / 2, height, 64 ), material );
+    var secundaryTrunk = new THREE.Mesh( new THREE.CylinderGeometry( radius / 2, radius / 2, height, 64 ), materials[1] );
     secundaryTrunk.rotation.z = Math.PI / 2 + angle;
     secundaryTrunk.position.set( 4, -2, 0 );
     mainTrunk.add( secundaryTrunk );
 
-    material = new THREE.MeshLambertMaterial( {color: 'darkgreen', wireframe: false} );
-
-    var mainTop = new THREE.Mesh( new THREE.SphereGeometry( 7, 32, 16 ), material );
+    var mainTop = new THREE.Mesh( new THREE.SphereGeometry( 7, 32, 16 ), materials[2] );
     mainTop.scale.set( 1, 5 / 7, 5 / 7 );
     mainTop.rotation.z = - angle;
     mainTop.position.set( 0, height / 2 + 4, 0 );
     mainTrunk.add( mainTop );
 
-    var secundaryTop = new THREE.Mesh( new THREE.SphereGeometry( 7, 32, 16 ), material );
+    var secundaryTop = new THREE.Mesh( new THREE.SphereGeometry( 7, 32, 16 ), materials[2] );
     secundaryTop.scale.set( 1, 5 / 7, 5 / 7 );
     secundaryTop.rotation.z = angle;
     secundaryTop.position.set( 0, - height / 2 - 4, 0 );
     secundaryTrunk.add( secundaryTop );
 
-    var thirdTop = new THREE.Mesh( new THREE.SphereGeometry( 7, 32, 16 ), material );
+    var thirdTop = new THREE.Mesh( new THREE.SphereGeometry( 7, 32, 16 ), materials[2] );
     thirdTop.scale.set( 1, 5 / 7, 5 / 7 );
     thirdTop.position.set( 0, 4 + height + radius, 0 );
     rootTrunk.add( thirdTop );
@@ -388,6 +456,7 @@ function createTree(size, x, z, orientation){
     tree.scale.set(size, size, size);
     tree.rotation.y = orientation;
     tree.position.set(x, 0, z);
+    trees.push(tree);
     scene.add( tree );
 
 }
@@ -395,26 +464,25 @@ function createTree(size, x, z, orientation){
 function createOvni(){
     'use strict';
     
+    createMaterial( {color: 'grey', wireframe: false} );
+    createMaterial( {color: 'red', wireframe: false} );
+    
     ovni = new THREE.Object3D();
     ovni.userData = { xPositive: 0, xNegative: 0, zPositive: 0, zNegative: 0 };
     
-    material = new THREE.MeshPhongMaterial( {color: 'grey', wireframe: false} );
-    
-    var body = new THREE.Mesh( new THREE.SphereGeometry( 28, 32, 16 ), material );
+    var body = new THREE.Mesh( new THREE.SphereGeometry( 28, 32, 16 ), materials[7] );
     body.scale.set(1, 4 / 28, 1);
     ovni.add( body );
 
-    var cockpit = new THREE.Mesh( new THREE.SphereGeometry( 10, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2 ), material );
+    var cockpit = new THREE.Mesh( new THREE.SphereGeometry( 10, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2 ), materials[7] );
     ovni.add( cockpit );
 
-    var cylinder = new THREE.Mesh( new THREE.CylinderGeometry( 6, 6, 4, 32 ), material );
+    var cylinder = new THREE.Mesh( new THREE.CylinderGeometry( 6, 6, 4, 32 ), materials[7] );
     cylinder.position.set(0, - 4, 0);
     ovni.add( cylinder );
 
-    material = new THREE.MeshPhongMaterial( {color: 'red', wireframe: false} );
-
     for (var angle = 0; angle < 2 * Math.PI; angle += Math.PI / 4) {
-        var smallSphere = new THREE.Mesh( new THREE.SphereGeometry( 2, 32, 16 ), material );
+        var smallSphere = new THREE.Mesh( new THREE.SphereGeometry( 2, 32, 16 ), materials[8] );
         smallSphere.position.set( 18  * Math.cos(angle), - 2.75, 18 * Math.sin(angle) );
         createPointLight(smallSphere);
         ovni.add( smallSphere );
@@ -428,6 +496,12 @@ function createOvni(){
 function createHouse(){
     'use strict';
 
+    createMaterial( {color: 'white', wireframe: false} );
+    createMaterial( {color: 'orange', wireframe: false} );
+    createMaterial( {color: 'blue', wireframe: false} );
+    createMaterial( {color: 'brown', wireframe: false} );
+
+    
     house = new THREE.Object3D();
 
     createHouseSides();
@@ -438,7 +512,7 @@ function createHouse(){
     createHouseWindows();
     createHouseDoor();
 
-    house.position.set(10, 17, 0)
+    house.position.set(10, 17, 0);
 
     scene.add(house);
 }
@@ -466,13 +540,11 @@ function createHouseSides(){
     geom.setIndex(indices);
     geom.computeVertexNormals();
 
-    const material = new THREE.MeshLambertMaterial( { color: 'white' });
-
-    lSide = new THREE.Mesh( geom, material );
+    lSide = new THREE.Mesh( geom, materials[3] );
 
     house.add(lSide);
 
-    rSide = new THREE.Mesh( geom, material );
+    rSide = new THREE.Mesh( geom, materials[3] );
 
     rSide.position.set(36, 0, 16);
 
@@ -544,9 +616,7 @@ function createHouseFront(){
     geom.setIndex(indices);
     geom.computeVertexNormals();
 
-    const material = new THREE.MeshLambertMaterial( { color: 'white' } );
-
-    front = new THREE.Mesh( geom, material );
+    front = new THREE.Mesh( geom, materials[3] );
 
     front.position.set(0, 0, 16);
 
@@ -574,9 +644,7 @@ function createHouseBack(){
     geom.setIndex(indices);
     geom.computeVertexNormals();
 
-    const material = new THREE.MeshLambertMaterial( { color: 'white' } );
-
-    back = new THREE.Mesh( geom, material );
+    back = new THREE.Mesh( geom, materials[3] );
 
     house.add(back);
 }
@@ -610,9 +678,7 @@ function createHouseRoof(){
     geom.setIndex(indices);
     geom.computeVertexNormals();
 
-    const material = new THREE.MeshLambertMaterial( { color: 'orange'});
-
-    roof = new THREE.Mesh( geom, material );
+    roof = new THREE.Mesh( geom, materials[4] );
 
     roof.position.set(0, 12, 0);
 
@@ -660,9 +726,7 @@ function createHouseChimney(){
     geom.setIndex(indices);
     geom.computeVertexNormals();
 
-    const material = new THREE.MeshLambertMaterial( { color: 'white' });
-
-    chimney = new THREE.Mesh( geom, material );
+    chimney = new THREE.Mesh( geom, materials[3] );
 
     chimney.position.set(7, 13, 2);
 
@@ -708,9 +772,7 @@ function createHouseWindows(){
     geom.setIndex(indices);
     geom.computeVertexNormals();
 
-    const material = new THREE.MeshLambertMaterial( { color: 'blue' } );
-
-    windows = new THREE.Mesh( geom, material );
+    windows = new THREE.Mesh( geom, materials[5] );
 
     windows.position.set(0, 0, 16);
 
@@ -740,14 +802,13 @@ function createHouseDoor(){
     geom.setIndex(indices);
     geom.computeVertexNormals();
 
-    const material = new THREE.MeshLambertMaterial( { color: 'brown' } );
-
-    door = new THREE.Mesh( geom, material );
+    door = new THREE.Mesh( geom, materials[6] );
 
     door.position.set(0, 0, 16);
 
     house.add(door);
 }
+
 //////////////////////
 /* CHECK COLLISIONS */
 //////////////////////
@@ -821,6 +882,7 @@ function init() {
 
     window.addEventListener("keydown", onKeyDown);
     window.addEventListener("keyup", onKeyUp);
+    window.addEventListener("resize", onResize);
 }
 
 /////////////////////
@@ -843,6 +905,12 @@ function animate() {
 function onResize() { 
     'use strict';
 
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
+    if (window.innerHeight > 0 && window.innerWidth > 0) {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+    }
 }
 
 ///////////////////////
@@ -874,7 +942,26 @@ function onKeyDown(e) {
 
         case 'D': case 'd': // toggle directionalLight
             directionalLight.visible = !directionalLight.visible;
+            break;
 
+        case 'Q': case 'q': // Gouraud shading
+            updateMaterials(lambertMaterials);
+            materials = lambertMaterials;
+            break;
+        case 'W': case 'w': // Phong shading
+            updateMaterials(phongMaterials);
+            materials = phongMaterials;
+            break;
+        case 'E': case 'e': // Toon shading
+            updateMaterials(toonMaterials);
+            materials = toonMaterials;
+            break;
+        
+        case 'R': case 'r': // Deactivates illumination calculations
+            updateMaterials(basicMaterials);
+            materials = basicMaterials;
+            break;
+        
         case 'P': case 'p': // activates spotLight and pointLights
             spotLight.visible = true;
             pointLights.forEach(pointLight => {pointLight.visible = true});
