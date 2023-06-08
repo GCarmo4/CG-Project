@@ -16,6 +16,8 @@ horas despendidas pelo grupo(media do grupo): 10h
 
 var camera, scene, renderer;
 
+var texture;
+
 var geometry, material, mesh;
 
 var _generateSky;
@@ -116,11 +118,9 @@ function createFieldCamera() {
 function createSkyCamera() {
     'use strict';
 
-    let skyCamera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 1000 );
+    var skyCamera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 1000 );
     skyCamera.position.set(0, 0, 200);
     skyCamera.lookAt(0, 0, 0);
-
-    return skyCamera;
 }
 
 function generateFieldSceneTexture(){
@@ -136,12 +136,10 @@ function generateFieldSceneTexture(){
 
     fieldRenderer.render(fieldScene, fieldCamera);
 
-    let texture = new THREE.CanvasTexture(fieldRenderer.domElement, THREE.UVMapping, THREE.RepeatWrapping, THREE.RepeatWrapping) // this is not getting the colors
+    texture = new THREE.CanvasTexture(fieldRenderer.domElement, THREE.UVMapping, THREE.RepeatWrapping, THREE.RepeatWrapping) // this is not getting the colors
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
     texture.repeat.set( 4, 4 );
-
-    return texture;
 }
 
 function saveTexture(r) {
@@ -155,7 +153,7 @@ function saveTexture(r) {
 }
 
 function createSkyScene() {
-    let skyScene = new THREE.Scene();
+    skyScene = new THREE.Scene();
     /*let skyMaterials = [
         new THREE.MeshBasicMaterial({color: 'darkblue'}),
         new THREE.MeshBasicMaterial({color: 'darkviolet'})
@@ -178,29 +176,148 @@ function createSkyScene() {
         starMesh.position.set(Math.random() * window.innerWidth - window.innerWidth / 2 , Math.random() * window.innerHeight - window.innerHeight / 2, 0);
         skyScene.add(starMesh);
     }
-
-    return skyScene;
 }
 
 function generateSkySceneTexture(){
     'use strict';
 
-    let skyRenderer = new THREE.WebGLRenderer({
-        antialias: true
-    }); skyRenderer.setSize(window.innerWidth, window.innerHeight);
+    var skyCamera = new THREE.PerspectiveCamera( 4, window.innerWidth / window.innerHeight, 1, 3500 );
 
-    let skyScene = createSkyScene();
-    let skyCamera = createSkyCamera();
+    skyCamera.position.x = -2;
+    skyCamera.position.y = 7;
+    skyCamera.position.z = 64;
+
+    var skyScene = new THREE.Scene();
+    skyScene.background = new THREE.Color( 0x050505 );
+
+    //
+
+    var light = new THREE.HemisphereLight();
+    skyScene.add( light );
+
+    //
+
+    var geometry = new THREE.BufferGeometry();
+
+    const indices = [];
+
+    const vertices = [];
+    const normals = [];
+    const colors = [];
+
+    const size = 20;
+    const segments = 10;
+
+    const halfSize = size / 2;
+    const segmentSize = size / segments;
+
+    var _color = new THREE.Color();
+
+    // generate vertices, normals and color data for a simple grid geometry
+
+    for ( let i = 0; i <= segments; i ++ ) {
+
+        const y = ( i * segmentSize ) - halfSize;
+
+        for ( let j = 0; j <= segments; j ++ ) {
+
+            const x = ( j * segmentSize ) - halfSize;
+
+            vertices.push( x, - y, 0 );
+            normals.push( 0, 0, 1 );
+
+            const r = ( x / size ) + 0.5;
+            const g = ( y / size ) + 0.5;
+
+            _color.setRGB( r, g, 1, THREE.SRGBColorSpace );
+
+            colors.push( _color.r, _color.g, _color.b );
+
+        }
+
+    }
+
+    // generate indices (data for element array buffer)
+
+    for ( let i = 0; i < segments; i ++ ) {
+
+        for ( let j = 0; j < segments; j ++ ) {
+
+            const a = i * ( segments + 1 ) + ( j + 1 );
+            const b = i * ( segments + 1 ) + j;
+            const c = ( i + 1 ) * ( segments + 1 ) + j;
+            const d = ( i + 1 ) * ( segments + 1 ) + ( j + 1 );
+
+            // generate two faces (triangles) per iteration
+
+            indices.push( a, b, d ); // face one
+            indices.push( b, c, d ); // face two
+
+        }
+
+    }
+
+    //
+
+    geometry.setIndex( indices );
+    geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( vertices, 3 ) );
+    geometry.setAttribute( 'normal', new THREE.Float32BufferAttribute( normals, 3 ) );
+    geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colors, 3 ) );
+
+    var skyMaterial = new THREE.MeshPhongMaterial( {
+        side: THREE.DoubleSide,
+        vertexColors: true
+    } );
+
+    var skyMesh = new THREE.Mesh( geometry, skyMaterial );
+    skyScene.add( skyMesh );
+
+    //
+
+    var skyRenderer = new THREE.WebGLRenderer( { antialias: true } );
+    skyRenderer.setPixelRatio( window.devicePixelRatio );
+    skyRenderer.setSize( window.innerWidth, window.innerHeight );
+    //document.body.appendChild( renderer.domElement );
+
+    //skyRenderer.render(skyScene, skyCamera);
+    skyRenderer.render(skyScene, skyCamera);
+    //document.body.appendChild( skyRenderer.domElement );
+    //skyRenderer = new THREE.WebGLRenderer({
+    //    antialias: true
+    //}); skyRenderer.setSize(window.innerWidth, window.innerHeight);
+
+    //createSkyScene();
+    //createSkyCamera();
+    //skyCamera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 1000 );
+    //skyCamera.position.set(0, 0, 200);
+    //skyCamera.lookAt(0, 0, 0);
+
+    //texture = new THREE.CanvasTexture(skyRenderer.domElement, THREE.UVMapping, THREE.RepeatWrapping, THREE.RepeatWrapping) // this is not getting the colors
+
+
+
+    let starMaterials = [
+        new THREE.MeshBasicMaterial({color: 'white'})
+    ]
+    let starGeometry = new THREE.SphereGeometry(0.0009);
 
     //skyScene.background = new THREE.TextureLoader().load('textures/skyBackground.png'); //  nao funciona
+    let numberOfstars = randomNumberGenerator(100,500);
+    for (let i = 0; i < numberOfstars; i++){
+        let starMesh = new THREE.Mesh(starGeometry, randomChoice(starMaterials));
+        starMesh.position.set(-2+Math.random()-Math.random(), 7+Math.random()-Math.random(), Math.random()-Math.random()+60);
+        skyScene.add(starMesh);
+    }
 
+    skyRenderer.clear();
     skyRenderer.render(skyScene, skyCamera);
-    //saveTexture(skyRenderer)
-    let texture = new THREE.CanvasTexture(skyRenderer.domElement, THREE.UVMapping, THREE.RepeatWrapping, THREE.RepeatWrapping) // this is not getting the colors
-    texture.wrapS = THREE.RepeatWrapping;
-    texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set( 4, 4 );
-    return texture;
+    texture = new THREE.CanvasTexture(skyRenderer.domElement, THREE.UVMapping, THREE.RepeatWrapping, THREE.RepeatWrapping) // this is not getting the colors
+    //skyRenderer.render(skyScene, skyCamera);
+    // saveTexture(skyRenderer)
+   texture.wrapS = THREE.MirroredRepeatWrapping;
+   texture.wrapT = THREE.MirroredRepeatWrapping;
+    texture.repeat.set( 2, 2 );
+
 }
 
 
@@ -227,7 +344,7 @@ function createSky() {
     geometry = new THREE.SphereGeometry(128*5, 128, 128, 0, 2*Math.PI, 0, 0.5 * Math.PI);
 
     // take out after
-    let texture = new THREE.TextureLoader().load('textures/skyBackground.png');
+    texture = new THREE.TextureLoader().load('textures/skyBackground.png');
 
     // color para desenrascar por enquanto
     material = new THREE.MeshBasicMaterial( {map: texture, side: THREE.BackSide} );
@@ -832,12 +949,14 @@ function update(){
     ovni.rotation.y += 0.40 * delta;
 
     if (generateField()) {
-        field.material.map = generateFieldSceneTexture();
+        generateFieldSceneTexture();
+        field.material.map = texture;
         doneGeneratingField();
     }
 
     if (generateSky()) {
-        sky.material.map = generateSkySceneTexture();
+        generateSkySceneTexture()
+        sky.material.map = texture;
         doneGeneratingSky()
     }
 }
