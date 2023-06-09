@@ -25,16 +25,13 @@ var displacementTexture;
 var field, sky;
 
 var moon;
-
 var trees = [];
-
-var house, lSide, rSide, front, back, roof, chimney, windows, door, house;
-
+var house, lSide, rSide, front, back, roof, chimney, windows, door;
 var ovni;
 
-var directionalLight, directionalLightIntensity = 0.5;
-var spotLight, spotLightIntensity = 0.8;
-var pointLights = [], pointLightIntensity = 0.25;
+var directionalLight;
+var spotLight;
+var pointLights = [];
 
 var clock, delta;
 
@@ -43,18 +40,6 @@ var phongMaterials = [];
 var lambertMaterials = [];
 var toonMaterials = [];
 var basicMaterials = [];
-
-function randomChoice(arr) {
-    // get random index value
-    let randomIndex = Math.floor(Math.random() * arr.length);
-
-    // get random item
-    return arr[randomIndex];
-}
-
-function randomNumberGenerator(ll, rl) {
-    return Math.floor(Math.random() * (rl - ll) + ll);
-}
 
 function createFieldScene() {
     var fieldScene = new THREE.Scene();
@@ -79,26 +64,6 @@ function createFieldScene() {
     return fieldScene;
 }
 
-function createFieldCamera() {
-    'use strict';
-
-    // var fieldCamera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 1000 );
-    // fieldCamera.position.set(0, 0, 200);
-    // fieldCamera.lookAt(0, 0, 0);
-
-    var fieldCamera = new THREE.OrthographicCamera(window.innerWidth / -2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / -2, 0, 1);
-
-    return fieldCamera;
-}
-
-function createSkyCamera() {
-    'use strict';
-
-    var skyCamera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 1000 );
-    skyCamera.position.set(0, 0, 200);
-    skyCamera.lookAt(0, 0, 0);
-}
-
 function generateFieldMaterial(){
     'use strict';
 
@@ -110,24 +75,6 @@ function generateFieldMaterial(){
     var texture = new THREE.CanvasTexture(fieldRenderer.domElement, THREE.UVMapping, THREE.RepeatWrapping, THREE.RepeatWrapping);
 
     return new THREE.MeshPhongMaterial( { displacementMap: displacementTexture, displacementScale:200, map: texture, wireframe:false } );
-}
-
-function createSkyScene() {
-    skyScene = new THREE.Scene();
-
-    let starMaterials = [
-        new THREE.MeshBasicMaterial({color: 'white'})
-    ]
-    let starGeometry = new THREE.SphereGeometry(1);
-
-    skyScene.background = new THREE.Color('darkblue');
-
-    let numberOfstars = randomNumberGenerator(100,500);
-    for (let i = 0; i < numberOfstars; i++){
-        let starMesh = new THREE.Mesh(starGeometry, randomChoice(starMaterials));
-        starMesh.position.set(Math.random() * window.innerWidth - window.innerWidth / 2 , Math.random() * window.innerHeight - window.innerHeight / 2, 0);
-        skyScene.add(starMesh);
-    }
 }
 
 function generateSkyMaterial(){
@@ -226,16 +173,14 @@ function generateSkyMaterial(){
     skyRenderer.setPixelRatio( window.devicePixelRatio );
     skyRenderer.setSize( window.innerWidth, window.innerHeight );
 
-    skyRenderer.render(skyScene, skyCamera);
-
     let starMaterials = [
         new THREE.MeshBasicMaterial({color: 'white'})
     ]
     let starGeometry = new THREE.SphereGeometry(0.0009);
 
-    let numberOfstars = randomNumberGenerator(100,500);
+    const numberOfstars = THREE.MathUtils.randInt(100, 500);
     for (let i = 0; i < numberOfstars; i++){
-        let starMesh = new THREE.Mesh(starGeometry, randomChoice(starMaterials));
+        let starMesh = new THREE.Mesh(starGeometry, starMaterials[THREE.MathUtils.randInt(0, starMaterials.length - 1)]);
         starMesh.position.set(-2+Math.random()-Math.random(), 7+Math.random()-Math.random(), Math.random()-Math.random()+60);
         skyScene.add(starMesh);
     }
@@ -274,7 +219,7 @@ function createSky() {
     material = new THREE.MeshPhongMaterial( {wireframe:false} );
 
     sky = new THREE.Mesh( geometry, material );
-    sky.position.set(0, -10, 0);
+    sky.position.set(0, -12, 0);
 
     scene.add( sky );
 }
@@ -310,6 +255,7 @@ function createCameras(){
     const controls = new THREE.OrbitControls( camera, renderer.domElement );
     controls.minDistance = 20;
  	controls.maxDistance = 1000;
+    controls.maxPolarAngle = Math.PI / 2;
 }
 
 /////////////////////
@@ -318,7 +264,7 @@ function createCameras(){
 function createDirectionalLight(){
     'use strict';
 
-    directionalLight = new THREE.DirectionalLight( 'white', 0.4 );
+    directionalLight = new THREE.DirectionalLight( 'lightyellow', 0.4 );
     directionalLight.position.set( moon.position.x, moon.position.y, moon.position.z);
     scene.add( directionalLight );
 }
@@ -326,14 +272,14 @@ function createDirectionalLight(){
 function createAmbientLight(){
     'use strict';
 
-    var ambientLight = new THREE.AmbientLight('white', 0.2);
+    var ambientLight = new THREE.AmbientLight('lightyellow', 0.2);
     scene.add( ambientLight );
 }
 
 function createSpotLight() {
     'use strict';
 
-    spotLight = new THREE.SpotLight( 'white', spotLightIntensity, 300, Math.PI / 6, 0.1 );
+    spotLight = new THREE.SpotLight( 'white', 0.8, 300, Math.PI / 6, 0.1 );
     ovni.add( spotLight );
 
     var targetObject = new THREE.Object3D();
@@ -346,7 +292,7 @@ function createSpotLight() {
 function createPointLight(smallSphere) {
     'use strict';
 
-    var pointLight = new THREE.PointLight( 0xff0000, pointLightIntensity, 150 );
+    var pointLight = new THREE.PointLight( 0xff0000, 0.2, 150 );
     pointLights.push( pointLight );
     smallSphere.add( pointLight );
 }
@@ -407,7 +353,7 @@ function createMoon(){
     wireframe: false} );
 
     moon = new THREE.Mesh( new THREE.SphereGeometry( 56, 32, 16 ), materials[0] );
-    moon.position.set( -200, 200, 0 );
+    moon.position.set( 0, 200, - 300 );
     scene.add( moon );
 }
 
@@ -444,7 +390,6 @@ function createTree(size, x, z, orientation, height){
 
     var angle = Math.PI / 6;
     var radius =  2 * Math.cos(angle);
-    //var height = 12;
     var mainTrunk = new THREE.Mesh( new THREE.CylinderGeometry( radius, radius, height, 64 ), materials[1] );
     mainTrunk.rotation.z = angle;
     mainTrunk.position.set( 2 - (radius * Math.cos(angle) + height / 2 * Math.sin(angle)), length / 2 - (radius * Math.sin(angle) - height / 2 * Math.cos(angle)), 0 );
